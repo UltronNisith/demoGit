@@ -1,0 +1,1205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Language App Beta</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Serif+JP:wght@600;700&family=Hind+Siliguri:wght@500;600;700&family=Noto+Sans+Devanagari:wght@500;600&display=swap" rel="stylesheet" />
+    <style>
+      button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) { min-height: 2.75rem; }
+      :root{
+        --bg:#f4f2ec; --surface:#ffffff; --surface2:#eceae2; --ink:#17202b; --muted:#5b6572;
+        --line:#ddd8cb; --accent:#d9481c; --accent-ink:#ffffff; --teal:#0b7566; --teal-soft:#e0f0ec;
+        --gold:#b07d10; --gold-soft:#f7ecd2; --good:#177245; --warn:#b3261e; --warn-soft:#fbe7e4;
+        --chip:#ffffff; --shadow:0 10px 30px rgba(23,32,43,.10); --radius:14px;
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#10141a; --surface:#1a202a; --surface2:#232b38; --ink:#eef1f5; --muted:#a7b0bd;
+          --line:#333d4d; --accent:#ff7a4d; --accent-ink:#1a0e08; --teal:#3ec9b0; --teal-soft:#143a35;
+          --gold:#e6b84f; --gold-soft:#3a3118; --good:#5fd08c; --warn:#ff9a8f; --warn-soft:#45201d;
+          --chip:#1a202a; --shadow:0 10px 30px rgba(0,0,0,.45);
+        }
+      }
+      *{box-sizing:border-box}
+      html{scroll-behavior:smooth}
+      body{margin:0;background:var(--bg);color:var(--ink);font-family:"Plus Jakarta Sans","Noto Sans Devanagari","Hind Siliguri",system-ui,sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased}
+      .ja{font-family:"Noto Serif JP","Plus Jakarta Sans",serif}
+      .bn{font-family:"Hind Siliguri","Plus Jakarta Sans",sans-serif}
+      .hi{font-family:"Noto Sans Devanagari","Plus Jakarta Sans",sans-serif}
+      .wrap{max-width:1080px;margin:0 auto;padding:0 16px 64px}
+      a{color:var(--teal)}
+
+      /* ---------- Hero ---------- */
+      .hero{padding:30px 0 8px}
+      .hero-grid{display:grid;grid-template-columns:1.35fr .85fr;gap:20px;align-items:stretch}
+      @media (max-width:760px){.hero-grid{grid-template-columns:1fr}}
+      .hello-stack{display:flex;flex-direction:column;gap:2px;margin:0 0 14px}
+      .hello-stack .h-en{font-size:clamp(2rem,6vw,3.1rem);font-weight:800;letter-spacing:-.02em;line-height:1.08}
+      .hello-stack .h-ja{font-size:clamp(1.9rem,5.4vw,2.9rem);font-weight:700;line-height:1.15;color:var(--accent)}
+      .hello-stack .h-bn{font-size:clamp(1.9rem,5.4vw,2.9rem);font-weight:700;line-height:1.25;color:var(--teal)}
+      .hero p.lede{font-size:1.06rem;color:var(--muted);max-width:56ch;margin:0 0 16px}
+      .hero p.lede strong{color:var(--ink)}
+      .stat-row{display:flex;flex-wrap:wrap;gap:8px}
+      .stat{background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:7px 13px;font-size:.86rem;font-weight:600}
+      .stat b{color:var(--accent)}
+      .daily{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;display:flex;flex-direction:column;gap:6px}
+      .daily .kicker{font-size:.78rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--gold)}
+      .daily .big{font-size:1.65rem;font-weight:700;line-height:1.3}
+      .daily .romaji{color:var(--muted);font-weight:600}
+      .daily .meaning{font-size:.95rem}
+      .daily .row{margin-top:auto;display:flex;gap:8px;flex-wrap:wrap}
+
+      /* ---------- Buttons / inputs ---------- */
+      .btn{appearance:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:10px 16px;font:inherit;font-weight:700;font-size:.95rem;cursor:pointer;display:inline-flex;align-items:center;gap:8px;justify-content:center;min-height:44px}
+      .btn:hover{border-color:var(--muted)}
+      .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+      .btn.teal{background:var(--teal);border-color:var(--teal);color:#fff}
+      @media (prefers-color-scheme: dark){.btn.teal{color:#07231e}}
+      .btn.ghost{background:transparent}
+      .btn.small{min-height:38px;padding:6px 12px;font-size:.88rem}
+      .btn:disabled{opacity:.45;cursor:not-allowed}
+      .btn.recording{background:var(--warn);border-color:var(--warn);color:#fff;animation:pulse 1.1s ease-in-out infinite}
+      @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+      @media (prefers-reduced-motion: reduce){.btn.recording{animation:none} html{scroll-behavior:auto}}
+      select,input[type="text"],input[type="search"],textarea{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px;width:100%}
+      textarea{resize:vertical;min-height:76px}
+      label.flabel{display:block;font-size:.82rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+      .icon{width:19px;height:19px;flex:none}
+
+      /* ---------- Tabs ---------- */
+      .tabbar{position:sticky;top:0;z-index:20;background:var(--bg);padding:14px 0 10px;margin-top:18px}
+      .tabs{display:flex;gap:8px;flex-wrap:wrap}
+      .tab{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:9px 16px;font:inherit;font-weight:700;font-size:.93rem;cursor:pointer;min-height:44px}
+      .tab[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+      .panel{display:none}
+      .panel.active{display:block}
+      .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow)}
+      .card h2{margin:0 0 4px;font-size:1.35rem;letter-spacing:-.01em}
+      .card .sub{color:var(--muted);margin:0 0 16px;font-size:.97rem}
+      .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+      @media (max-width:640px){.grid2{grid-template-columns:1fr}}
+
+      /* ---------- Translator ---------- */
+      .lang-row{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:end}
+      @media (max-width:520px){.lang-row{grid-template-columns:1fr 1fr}.lang-row .swap{align-self:end}}
+      .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+      .chip{border:1px solid var(--line);background:var(--surface2);color:var(--ink);border-radius:999px;padding:8px 13px;font:inherit;font-size:.88rem;font-weight:600;cursor:pointer;min-height:38px}
+      .chip:hover{border-color:var(--muted)}
+      .result{margin-top:18px;border-top:1px dashed var(--line);padding-top:16px;display:none}
+      .result.show{display:block}
+      .result .target{font-size:clamp(1.7rem,5vw,2.4rem);font-weight:700;line-height:1.3;margin:2px 0 4px}
+      .result .romaji{font-size:1.05rem;color:var(--teal);font-weight:700}
+      .result .back{color:var(--muted);margin-top:6px}
+      .badge{display:inline-block;border-radius:999px;padding:3px 10px;font-size:.76rem;font-weight:800;letter-spacing:.03em}
+      .badge.match{background:var(--teal-soft);color:var(--teal)}
+      .badge.word{background:var(--gold-soft);color:var(--gold)}
+      .result .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+      .mic-note{font-size:.88rem;color:var(--muted);margin-top:8px;min-height:1.3em}
+      .mic-note.err{color:var(--warn)}
+
+      /* ---------- Phrasebook ---------- */
+      .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+      .toolbar .grow{flex:1 1 220px}
+      .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden}
+      .seg button{border:0;background:var(--surface);color:var(--ink);font:inherit;font-weight:700;padding:9px 16px;cursor:pointer;min-height:44px}
+      .seg button[aria-pressed="true"]{background:var(--teal);color:#fff}
+      @media (prefers-color-scheme: dark){.seg button[aria-pressed="true"]{color:#07231e}}
+      .cat{margin:22px 0 8px;font-size:1.02rem;font-weight:800}
+      .cat:first-of-type{margin-top:6px}
+      .phrase-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
+      .phrase{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:3px}
+      .phrase .src{font-weight:700}
+      .phrase .src small{display:block;color:var(--muted);font-weight:600;font-size:.83rem}
+      .phrase .tgt{font-size:1.3rem;font-weight:700;line-height:1.35;margin-top:6px}
+      .phrase .rom{color:var(--teal);font-weight:700;font-size:.92rem}
+      .phrase .foot{margin-top:10px;display:flex;gap:8px}
+
+      /* ---------- Chat practice ---------- */
+      .chatlog{display:flex;flex-direction:column;gap:10px;max-height:430px;overflow-y:auto;padding:4px 2px;margin-bottom:14px}
+      .bubble{max-width:86%;border-radius:14px;padding:11px 14px;font-size:1rem}
+      .bubble.tutor{background:var(--surface2);align-self:flex-start;border-bottom-left-radius:4px}
+      .bubble.me{background:var(--teal);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+      @media (prefers-color-scheme: dark){.bubble.me{color:#07231e}}
+      .bubble .big{font-size:1.22rem;font-weight:700;display:block;line-height:1.35}
+      .bubble .small{display:block;font-size:.85rem;opacity:.85;margin-top:2px}
+      .bubble .hear{margin-top:6px}
+      .options{display:flex;flex-direction:column;gap:8px}
+      .opt{text-align:left;width:100%}
+      .opt .big{display:block;font-size:1.12rem;font-weight:700}
+      .opt .small{display:block;font-size:.86rem;color:var(--muted);font-weight:600}
+      .opt.correct{border-color:var(--good);background:var(--teal-soft)}
+      .opt.wrong{border-color:var(--warn);background:var(--warn-soft)}
+      .feedback{border-radius:10px;padding:11px 14px;font-size:.95rem;display:none;margin-top:12px}
+      .feedback.show{display:block}
+      .feedback.good{background:var(--teal-soft)}
+      .feedback.bad{background:var(--warn-soft)}
+
+      /* ---------- Speak & score ---------- */
+      .score-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+      .scorebox{background:var(--surface2);border-radius:12px;padding:14px}
+      .scorebox .num{font-size:1.9rem;font-weight:800;line-height:1}
+      .scorebox .lbl{font-size:.82rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);margin:4px 0 8px}
+      .bar{height:9px;border-radius:99px;background:var(--line);overflow:hidden}
+      .bar i{display:block;height:100%;width:0;background:var(--teal);border-radius:99px;transition:width .6s ease}
+      .bar i.mid{background:var(--gold)} .bar i.low{background:var(--warn)}
+      @media (prefers-reduced-motion: reduce){.bar i{transition:none}}
+      .overall{display:flex;align-items:center;gap:16px;margin-top:16px;flex-wrap:wrap}
+      .overall .big-num{font-size:3rem;font-weight:800;line-height:1;color:var(--accent)}
+      .tips{margin:12px 0 0;padding-left:20px}
+      .tips li{margin:4px 0}
+      .heard{font-size:1.05rem;margin-top:10px}
+      .heard b{color:var(--teal)}
+      .practice-list{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+      .practice-item{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;background:var(--surface);cursor:pointer;text-align:left;font:inherit;width:100%;min-height:52px}
+      .practice-item[aria-pressed="true"]{border-color:var(--accent);outline:2px solid var(--accent);outline-offset:-1px}
+      .practice-item .t{font-size:1.2rem;font-weight:700}
+      .practice-item .m{margin-left:auto;color:var(--muted);font-size:.88rem;text-align:right}
+      .live-meter{display:none;align-items:center;gap:10px;margin-top:12px;font-weight:700}
+      .live-meter.on{display:flex}
+      .live-meter .track{flex:1;height:10px;background:var(--line);border-radius:99px;overflow:hidden}
+      .live-meter .fill{height:100%;width:0;background:var(--accent)}
+
+      /* ---------- Quiz ---------- */
+      .quiz-q{font-size:clamp(1.6rem,5vw,2.2rem);font-weight:700;text-align:center;padding:18px 0 4px;line-height:1.35}
+      .quiz-rom{text-align:center;color:var(--teal);font-weight:700;margin-bottom:16px}
+      .quiz-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+      @media (max-width:560px){.quiz-opts{grid-template-columns:1fr}}
+      .progress-line{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:12px 0}
+      .progress-line i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s ease}
+
+      footer{margin-top:34px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--line);padding-top:16px}
+      .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+
+      <!-- ================= HERO ================= -->
+      <header class="hero">
+        <div class="hero-grid">
+          <div>
+            <h1 class="hello-stack">
+              <span class="h-en">Hello.</span>
+              <span class="h-ja ja">こんにちは。</span>
+              <span class="h-bn bn">নমস্কার।</span>
+            </h1>
+            <p class="lede">Ask in <strong>English or Hindi</strong> — answer, learn and practise out loud in <strong>Japanese or Bengali</strong>. Translate phrases, chat through real-life scenes, and get a score for how your speaking sounds.</p>
+            <div class="stat-row">
+              <span class="stat"><b>45</b> everyday phrases</span>
+              <span class="stat"><b>6</b> conversation scenes</span>
+              <span class="stat"><b>16</b> speaking drills</span>
+              <span class="stat">Beta</span>
+            </div>
+          </div>
+          <aside class="daily" aria-label="Phrase of the day">
+            <span class="kicker">Phrase of the day</span>
+            <span class="big" id="dailyTarget">—</span>
+            <span class="romaji" id="dailyRomaji">—</span>
+            <span class="meaning" id="dailyMeaning">—</span>
+            <div class="row">
+              <button class="btn small teal" id="dailyListen" type="button">▶ Listen</button>
+              <button class="btn small" id="dailyTry" type="button">Practise this →</button>
+            </div>
+          </aside>
+        </div>
+      </header>
+
+      <!-- ================= TABS ================= -->
+      <div class="tabbar">
+        <div class="tabs" role="tablist" aria-label="App sections">
+          <button class="tab" role="tab" id="tab-translate" aria-selected="true" aria-controls="panel-translate" data-tab="translate" type="button">Translate &amp; Talk</button>
+          <button class="tab" role="tab" id="tab-phrases" aria-selected="false" aria-controls="panel-phrases" data-tab="phrases" type="button">Phrasebook</button>
+          <button class="tab" role="tab" id="tab-chat" aria-selected="false" aria-controls="panel-chat" data-tab="chat" type="button">Chat Practice</button>
+          <button class="tab" role="tab" id="tab-speak" aria-selected="false" aria-controls="panel-speak" data-tab="speak" type="button">Speak &amp; Score</button>
+          <button class="tab" role="tab" id="tab-quiz" aria-selected="false" aria-controls="panel-quiz" data-tab="quiz" type="button">Quiz</button>
+        </div>
+      </div>
+
+      <!-- ================= TRANSLATE ================= -->
+      <section class="panel active" id="panel-translate" role="tabpanel" aria-labelledby="tab-translate">
+        <div class="card">
+          <h2>Translate &amp; talk</h2>
+          <p class="sub">Type or speak in English or Hindi, and hear it back in Japanese or Bengali — script, pronunciation and all.</p>
+          <div class="lang-row">
+            <div>
+              <label class="flabel" for="fromLang">You ask in</label>
+              <select id="fromLang">
+                <option value="en">English</option>
+                <option value="hi">हिन्दी (Hindi)</option>
+              </select>
+            </div>
+            <button class="btn swap" id="swapBtn" type="button" aria-label="Swap direction" title="Try the reverse: learn the English / Hindi for a Japanese or Bengali phrase using the phrasebook below">⇄</button>
+            <div>
+              <label class="flabel" for="toLang">Answer in</label>
+              <select id="toLang">
+                <option value="ja">Japanese — 日本語</option>
+                <option value="bn">Bengali — বাংলা</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:14px">
+            <label class="flabel" for="inputText">Your sentence</label>
+            <textarea id="inputText" placeholder="Try: How to say hello · Where is the station? · Thank you"></textarea>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+            <button class="btn primary" id="translateBtn" type="button">Translate</button>
+            <button class="btn" id="micBtn" type="button">🎙 Speak instead</button>
+            <button class="btn ghost" id="clearBtn" type="button">Clear</button>
+          </div>
+          <p class="mic-note" id="micNote" aria-live="polite"></p>
+
+          <div class="chips" aria-label="Quick examples">
+            <button class="chip" type="button" data-q="Hello">How to say hello</button>
+            <button class="chip" type="button" data-q="How are you?">How are you?</button>
+            <button class="chip" type="button" data-q="Where is the station?">Where is the station?</button>
+            <button class="chip" type="button" data-q="धन्यवाद" data-from="hi">धन्यवाद (thank you)</button>
+            <button class="chip" type="button" data-q="मुझे भूख लगी है" data-from="hi">मुझे भूख लगी है (I’m hungry)</button>
+            <button class="chip" type="button" data-q="How much is this?">How much is this?</button>
+          </div>
+
+          <div class="result" id="result" aria-live="polite">
+            <span class="badge match" id="resultBadge">Phrasebook match</span>
+            <div class="target" id="resultTarget">—</div>
+            <div class="romaji" id="resultRomaji">—</div>
+            <p class="back" id="resultBack">—</p>
+            <div class="actions">
+              <button class="btn teal" id="listenBtn" type="button">▶ Listen</button>
+              <button class="btn" id="slowBtn" type="button">🐢 Slow listen</button>
+              <button class="btn" id="copyBtn" type="button">Copy text</button>
+              <button class="btn" id="scoreThisBtn" type="button">Score my try →</button>
+            </div>
+            <p class="mic-note" id="copyNote"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PHRASEBOOK ================= -->
+      <section class="panel" id="panel-phrases" role="tabpanel" aria-labelledby="tab-phrases">
+        <div class="card" style="box-shadow:none">
+          <h2>Phrasebook — the basics, taught properly</h2>
+          <p class="sub">Everyday phrases with the real script and a simple pronunciation guide. Tap <em>Listen</em> to hear each one, then try it in Speak &amp; Score.</p>
+          <div class="toolbar">
+            <div class="seg" role="group" aria-label="Target language">
+              <button type="button" id="pbJa" aria-pressed="true">Japanese 日本語</button>
+              <button type="button" id="pbBn" aria-pressed="false">Bengali বাংলা</button>
+            </div>
+            <div class="grow">
+              <label class="sr" for="pbSearch">Search phrases</label>
+              <input type="search" id="pbSearch" placeholder="Search: hello, station, hungry…" />
+            </div>
+          </div>
+          <div id="phrasebook"></div>
+          <p class="mic-note" id="pbEmpty" style="display:none">No phrases match that search — try “hello”, “food” or “station”.</p>
+        </div>
+      </section>
+
+      <!-- ================= CHAT PRACTICE ================= -->
+      <section class="panel" id="panel-chat" role="tabpanel" aria-labelledby="tab-chat">
+        <div class="card">
+          <h2>Chat practice</h2>
+          <p class="sub">Short real-life conversations. Your partner speaks first — listen, then pick the reply that fits. Finish a scene to earn your scene score.</p>
+          <div class="grid2" style="margin-bottom:16px">
+            <div>
+              <label class="flabel" for="sceneSelect">Choose a scene</label>
+              <select id="sceneSelect"></select>
+            </div>
+            <div style="display:flex;align-items:end;gap:8px">
+              <button class="btn primary" id="startSceneBtn" type="button">Start scene</button>
+              <span class="stat" id="sceneScore" style="display:none"></span>
+            </div>
+          </div>
+          <div class="chatlog" id="chatlog" aria-live="polite">
+            <div class="bubble tutor"><span class="small">Pick a scene and press Start — your conversation partner will speak first. Press ▶ on any message to hear it.</span></div>
+          </div>
+          <div class="options" id="chatOptions"></div>
+          <div class="feedback" id="chatFeedback" aria-live="polite"></div>
+          <div style="margin-top:12px;display:none" id="chatNextRow">
+            <button class="btn teal" id="chatNextBtn" type="button">Continue →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SPEAK & SCORE ================= -->
+      <section class="panel" id="panel-speak" role="tabpanel" aria-labelledby="tab-speak">
+        <div class="card">
+          <h2>Speak &amp; score</h2>
+          <p class="sub">Pick a phrase, listen to it, then say it out loud. You’ll be scored on <strong>accuracy</strong> (did the words land?), <strong>fluency</strong> (pace and steadiness) and <strong>tone &amp; energy</strong> (volume and how much your voice rises and falls — flat, monotone delivery scores lower).</p>
+          <div class="seg" role="group" aria-label="Practice language" style="margin-bottom:12px">
+            <button type="button" id="spJa" aria-pressed="true">Japanese 日本語</button>
+            <button type="button" id="spBn" aria-pressed="false">Bengali বাংলা</button>
+          </div>
+          <div class="practice-list" id="practiceList"></div>
+
+          <div style="margin-top:18px;border-top:1px dashed var(--line);padding-top:16px">
+            <span class="kicker" style="font-size:.78rem;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--gold)">Now you try</span>
+            <div class="quiz-q" id="spTarget" style="text-align:left;padding:8px 0 0">—</div>
+            <div class="quiz-rom" id="spRomaji" style="text-align:left;margin-bottom:6px">—</div>
+            <p class="back" id="spMeaning" style="color:var(--muted);margin:0 0 12px">—</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn teal" id="spListen" type="button">▶ Hear it first</button>
+              <button class="btn primary" id="spMic" type="button">🎙 Tap &amp; say it</button>
+            </div>
+            <div class="live-meter" id="liveMeter"><span>Listening…</span><div class="track"><div class="fill" id="meterFill"></div></div></div>
+            <p class="mic-note" id="spNote" aria-live="polite"></p>
+            <div class="grid2" style="margin-top:10px">
+              <div>
+                <label class="flabel" for="spTyped">No mic? Type exactly what you said</label>
+                <input type="text" id="spTyped" placeholder="Type the phrase as you said it…" />
+              </div>
+              <div style="display:flex;align-items:end">
+                <button class="btn" id="spTypeScore" type="button">Score my typing</button>
+              </div>
+            </div>
+            <div id="scoreArea" style="display:none">
+              <p class="heard" id="heardLine"></p>
+              <div class="score-grid">
+                <div class="scorebox"><div class="num" id="scAcc">–</div><div class="lbl">Accuracy</div><div class="bar"><i id="barAcc"></i></div></div>
+                <div class="scorebox"><div class="num" id="scFlu">–</div><div class="lbl">Fluency</div><div class="bar"><i id="barFlu"></i></div></div>
+                <div class="scorebox"><div class="num" id="scTone">–</div><div class="lbl">Tone &amp; energy</div><div class="bar"><i id="barTone"></i></div></div>
+              </div>
+              <div class="overall">
+                <span class="big-num" id="scOverall">–</span>
+                <div><strong id="scVerdict">—</strong><br /><span style="color:var(--muted)" id="scVerdictSub">—</span></div>
+              </div>
+              <ul class="tips" id="scTips"></ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= QUIZ ================= -->
+      <section class="panel" id="panel-quiz" role="tabpanel" aria-labelledby="tab-quiz">
+        <div class="card">
+          <h2>Quick quiz</h2>
+          <p class="sub">Ten rounds. Read the phrase, pick what it means. A fast way to lock the phrasebook into memory.</p>
+          <div class="seg" role="group" aria-label="Quiz language" style="margin-bottom:6px">
+            <button type="button" id="qzJa" aria-pressed="true">Japanese 日本語</button>
+            <button type="button" id="qzBn" aria-pressed="false">Bengali বাংলা</button>
+          </div>
+          <div class="progress-line"><i id="quizProg"></i></div>
+          <p style="margin:0;color:var(--muted);font-weight:700" id="quizStatus">Press Start when you’re ready.</p>
+          <div class="quiz-q" id="quizQ"></div>
+          <div class="quiz-rom" id="quizRom"></div>
+          <div class="quiz-opts" id="quizOpts"></div>
+          <div class="feedback" id="quizFeedback"></div>
+          <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn primary" id="quizStart" type="button">Start quiz</button>
+            <button class="btn teal" id="quizListen" type="button" style="display:none">▶ Hear the phrase</button>
+            <button class="btn" id="quizNext" type="button" style="display:none">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <p><strong>Beta notes:</strong> translations come from a built-in, hand-checked phrasebook of everyday sentences, plus a word-by-word helper for simple new sentences — natural, native phrasing can differ, so treat word-by-word results as a starting point. Speaking scores use your device’s microphone and speech recognition on this device; tone is estimated from your volume and pitch movement, which is a guide, not a native speaker’s ear. Japanese recognition works best in Chrome / Edge / Android; Bengali recognition support varies by device.</p>
+      </footer>
+    </div>
+
+    <script>
+    /* ============================================================
+       DATA — hand-checked phrasebook
+       jaR = romaji, bnR = simple pronunciation guide
+    ============================================================ */
+    var PHRASES = [
+      {cat:"Greetings", en:"Hello", hi:"नमस्ते", hiR:"Namaste", ja:"こんにちは", jaR:"Konnichiwa", bn:"হ্যালো", bnR:"Hyalo"},
+      {cat:"Greetings", en:"Good morning", hi:"सुप्रभात", hiR:"Suprabhat", ja:"おはようございます", jaR:"Ohayō gozaimasu", bn:"সুপ্রভাত", bnR:"Shuprobhat"},
+      {cat:"Greetings", en:"Good evening", hi:"शुभ संध्या", hiR:"Shubh sandhya", ja:"こんばんは", jaR:"Konbanwa", bn:"শুভ সন্ধ্যা", bnR:"Shubho shondhya"},
+      {cat:"Greetings", en:"Good night", hi:"शुभ रात्रि", hiR:"Shubh ratri", ja:"おやすみなさい", jaR:"Oyasuminasai", bn:"শুভ রাত্রি", bnR:"Shubho ratri"},
+      {cat:"Greetings", en:"Goodbye", hi:"अलविदा", hiR:"Alvida", ja:"さようなら", jaR:"Sayōnara", bn:"বিদায়", bnR:"Bidai"},
+      {cat:"Greetings", en:"Thank you", hi:"धन्यवाद", hiR:"Dhanyavad", ja:"ありがとうございます", jaR:"Arigatō gozaimasu", bn:"ধন্যবাদ", bnR:"Dhonnobad"},
+      {cat:"Greetings", en:"Sorry", hi:"माफ़ कीजिए", hiR:"Maaf kijiye", ja:"すみません", jaR:"Sumimasen", bn:"দুঃখিত", bnR:"Dukkhito"},
+      {cat:"Greetings", en:"Excuse me", hi:"क्षमा करें", hiR:"Kshama karen", ja:"すみません", jaR:"Sumimasen", bn:"মাফ করবেন", bnR:"Maf korben"},
+      {cat:"Greetings", en:"How are you?", hi:"आप कैसे हैं?", hiR:"Aap kaise hain?", ja:"お元気ですか？", jaR:"Ogenki desu ka?", bn:"কেমন আছেন?", bnR:"Kemon achen?"},
+      {cat:"Greetings", en:"I’m fine", hi:"मैं ठीक हूँ", hiR:"Main theek hoon", ja:"元気です", jaR:"Genki desu", bn:"আমি ভালো আছি", bnR:"Ami bhalo achi"},
+      {cat:"Greetings", en:"Nice to meet you", hi:"आपसे मिलकर खुशी हुई", hiR:"Aapse milkar khushi hui", ja:"はじめまして", jaR:"Hajimemashite", bn:"আপনার সঙ্গে দেখা করে খুশি হলাম", bnR:"Apnar shonge dekha kore khushi holam"},
+      {cat:"Greetings", en:"See you later", hi:"फिर मिलेंगे", hiR:"Phir milenge", ja:"またね", jaR:"Mata ne", bn:"আবার দেখা হবে", bnR:"Abar dekha hobe"},
+
+      {cat:"Everyday essentials", en:"Yes", hi:"हाँ", hiR:"Haan", ja:"はい", jaR:"Hai", bn:"হ্যাঁ", bnR:"Hyan"},
+      {cat:"Everyday essentials", en:"No", hi:"नहीं", hiR:"Nahin", ja:"いいえ", jaR:"Iie", bn:"না", bnR:"Na"},
+      {cat:"Everyday essentials", en:"Please", hi:"कृपया", hiR:"Kripya", ja:"お願いします", jaR:"Onegai shimasu", bn:"দয়া করে", bnR:"Doya kore"},
+      {cat:"Everyday essentials", en:"I don’t understand", hi:"मुझे समझ नहीं आया", hiR:"Mujhe samajh nahi aaya", ja:"わかりません", jaR:"Wakarimasen", bn:"আমি বুঝতে পারছি না", bnR:"Ami bujhte parchhi na"},
+      {cat:"Everyday essentials", en:"Do you speak English?", hi:"क्या आप अंग्रेज़ी बोलते हैं?", hiR:"Kya aap angrezi bolte hain?", ja:"英語を話せますか？", jaR:"Eigo o hanasemasu ka?", bn:"আপনি কি ইংরেজি বলতে পারেন?", bnR:"Apni ki ingreji bolte paren?"},
+      {cat:"Everyday essentials", en:"Help!", hi:"मदद करो!", hiR:"Madad karo!", ja:"助けて！", jaR:"Tasukete!", bn:"সাহায্য করুন!", bnR:"Shahajjo korun!"},
+      {cat:"Everyday essentials", en:"I love you", hi:"मैं तुमसे प्यार करता हूँ", hiR:"Main tumse pyaar karta hoon", ja:"愛しています", jaR:"Ai shite imasu", bn:"আমি তোমাকে ভালোবাসি", bnR:"Ami tomake bhalobashi"},
+      {cat:"Everyday essentials", en:"Congratulations", hi:"बधाई हो", hiR:"Badhai ho", ja:"おめでとうございます", jaR:"Omedetō gozaimasu", bn:"অভিনন্দন", bnR:"Obhinondon"},
+      {cat:"Everyday essentials", en:"What is your name?", hi:"आपका नाम क्या है?", hiR:"Aapka naam kya hai?", ja:"お名前は何ですか？", jaR:"Onamae wa nan desu ka?", bn:"আপনার নাম কী?", bnR:"Apnar nam ki?"},
+      {cat:"Everyday essentials", en:"Wait a moment", hi:"एक मिनट रुकिए", hiR:"Ek minute rukiye", ja:"ちょっと待ってください", jaR:"Chotto matte kudasai", bn:"একটু অপেক্ষা করুন", bnR:"Ektu opekkha korun"},
+
+      {cat:"Travel", en:"Where is the station?", hi:"स्टेशन कहाँ है?", hiR:"Station kahan hai?", ja:"駅はどこですか？", jaR:"Eki wa doko desu ka?", bn:"স্টেশন কোথায়?", bnR:"Station kothay?"},
+      {cat:"Travel", en:"How much is this?", hi:"यह कितने का है?", hiR:"Yeh kitne ka hai?", ja:"これはいくらですか？", jaR:"Kore wa ikura desu ka?", bn:"এটার দাম কত?", bnR:"Etar dam koto?"},
+      {cat:"Travel", en:"I want to go to the airport", hi:"मुझे हवाई अड्डे जाना है", hiR:"Mujhe hawai adde jana hai", ja:"空港に行きたいです", jaR:"Kūkō ni ikitai desu", bn:"আমি বিমানবন্দরে যেতে চাই", bnR:"Ami bimanbondore jete chai"},
+      {cat:"Travel", en:"Left", hi:"बायाँ", hiR:"Bayan", ja:"左", jaR:"Hidari", bn:"বাম", bnR:"Bam"},
+      {cat:"Travel", en:"Right", hi:"दायाँ", hiR:"Dayan", ja:"右", jaR:"Migi", bn:"ডান", bnR:"Dan"},
+      {cat:"Travel", en:"Hotel", hi:"होटल", hiR:"Hotel", ja:"ホテル", jaR:"Hoteru", bn:"হোটেল", bnR:"Hotel"},
+      {cat:"Travel", en:"Where is the toilet?", hi:"शौचालय कहाँ है?", hiR:"Shauchalay kahan hai?", ja:"トイレはどこですか？", jaR:"Toire wa doko desu ka?", bn:"বাথরুম কোথায়?", bnR:"Bathroom kothay?"},
+
+      {cat:"Food & drink", en:"I’m hungry", hi:"मुझे भूख लगी है", hiR:"Mujhe bhookh lagi hai", ja:"お腹がすきました", jaR:"Onaka ga sukimashita", bn:"আমার খিদে পেয়েছে", bnR:"Amar khide peyeche"},
+      {cat:"Food & drink", en:"Delicious!", hi:"स्वादिष्ट!", hiR:"Swadisht!", ja:"おいしい！", jaR:"Oishii!", bn:"মজাদার!", bnR:"Mojadar!"},
+      {cat:"Food & drink", en:"Menu, please", hi:"मेनू दीजिए", hiR:"Menu dijiye", ja:"メニューをお願いします", jaR:"Menyū o onegai shimasu", bn:"মেনুটা দিন, দয়া করে", bnR:"Menuta din, doya kore"},
+      {cat:"Food & drink", en:"Not spicy, please", hi:"तीखा नहीं, कृपया", hiR:"Teekha nahi, kripya", ja:"辛くしないでください", jaR:"Karaku shinaide kudasai", bn:"ঝাল দেবেন না, দয়া করে", bnR:"Jhal deben na, doya kore"},
+      {cat:"Food & drink", en:"Water, please", hi:"पानी दीजिए", hiR:"Paani dijiye", ja:"お水をください", jaR:"Omizu o kudasai", bn:"জল দিন, দয়া করে", bnR:"Jol din, doya kore"},
+      {cat:"Food & drink", en:"The bill, please", hi:"बिल दीजिए", hiR:"Bill dijiye", ja:"お会計をお願いします", jaR:"Okaikei o onegai shimasu", bn:"বিলটা দিন, দয়া করে", bnR:"Bilta din, doya kore"},
+      {cat:"Food & drink", en:"I am vegetarian", hi:"मैं शाकाहारी हूँ", hiR:"Main shakahari hoon", ja:"ベジタリアンです", jaR:"Bejitarian desu", bn:"আমি নিরামিষভোজী", bnR:"Ami niramishbhoji"},
+
+      {cat:"Feelings & daily life", en:"Let’s go", hi:"चलो चलें", hiR:"Chalo chalen", ja:"行きましょう", jaR:"Ikimashō", bn:"চলুন যাই", bnR:"Cholun jai"},
+      {cat:"Feelings & daily life", en:"I’m tired", hi:"मैं थक गया हूँ", hiR:"Main thak gaya hoon", ja:"疲れました", jaR:"Tsukaremashita", bn:"আমি ক্লান্ত", bnR:"Ami klanto"},
+      {cat:"Feelings & daily life", en:"Today is a good day", hi:"आज अच्छा दिन है", hiR:"Aaj achha din hai", ja:"今日はいい日です", jaR:"Kyō wa ii hi desu", bn:"আজ দিনটা ভালো", bnR:"Aj dinta bhalo"},
+
+      {cat:"Numbers", en:"One", hi:"एक", hiR:"Ek", ja:"一", jaR:"Ichi", bn:"এক", bnR:"Ek"},
+      {cat:"Numbers", en:"Two", hi:"दो", hiR:"Do", ja:"二", jaR:"Ni", bn:"দুই", bnR:"Dui"},
+      {cat:"Numbers", en:"Three", hi:"तीन", hiR:"Teen", ja:"三", jaR:"San", bn:"তিন", bnR:"Tin"},
+      {cat:"Numbers", en:"Four", hi:"चार", hiR:"Char", ja:"四", jaR:"Yon", bn:"চার", bnR:"Char"},
+      {cat:"Numbers", en:"Five", hi:"पाँच", hiR:"Paanch", ja:"五", jaR:"Go", bn:"পাঁচ", bnR:"Panch"},
+      {cat:"Numbers", en:"Ten", hi:"दस", hiR:"Das", ja:"十", jaR:"Jū", bn:"দশ", bnR:"Dosh"}
+    ];
+
+    /* Word-by-word helper dictionary (simple sentences only) */
+    var WORDS = {
+      "i":{ja:"わたし",jaR:"watashi",bn:"আমি",bnR:"ami"},"you":{ja:"あなた",jaR:"anata",bn:"আপনি",bnR:"apni"},
+      "water":{ja:"水",jaR:"mizu",bn:"জল",bnR:"jol"},"food":{ja:"食べ物",jaR:"tabemono",bn:"খাবার",bnR:"khabar"},
+      "tea":{ja:"お茶",jaR:"ocha",bn:"চা",bnR:"cha"},"coffee":{ja:"コーヒー",jaR:"kōhī",bn:"কফি",bnR:"kofi"},
+      "station":{ja:"駅",jaR:"eki",bn:"স্টেশন",bnR:"station"},"hotel":{ja:"ホテル",jaR:"hoteru",bn:"হোটেল",bnR:"hotel"},
+      "airport":{ja:"空港",jaR:"kūkō",bn:"বিমানবন্দর",bnR:"bimanbondor"},"train":{ja:"電車",jaR:"densha",bn:"ট্রেন",bnR:"train"},
+      "today":{ja:"今日",jaR:"kyō",bn:"আজ",bnR:"aj"},"tomorrow":{ja:"明日",jaR:"ashita",bn:"আগামীকাল",bnR:"agamikal"},
+      "friend":{ja:"友達",jaR:"tomodachi",bn:"বন্ধু",bnR:"bondhu"},"family":{ja:"家族",jaR:"kazoku",bn:"পরিবার",bnR:"poribar"},
+      "happy":{ja:"嬉しい",jaR:"ureshii",bn:"খুশি",bnR:"khushi"},"good":{ja:"いい",jaR:"ii",bn:"ভালো",bnR:"bhalo"},
+      "big":{ja:"大きい",jaR:"ōkii",bn:"বড়",bnR:"boro"},"small":{ja:"小さい",jaR:"chiisai",bn:"ছোট",bnR:"chhoto"},
+      "go":{ja:"行く",jaR:"iku",bn:"যাওয়া",bnR:"jaoa"},"come":{ja:"来る",jaR:"kuru",bn:"আসা",bnR:"asha"},
+      "eat":{ja:"食べる",jaR:"taberu",bn:"খাওয়া",bnR:"khaoa"},"drink":{ja:"飲む",jaR:"nomu",bn:"পান করা",bnR:"pan kora"},
+      "see":{ja:"見る",jaR:"miru",bn:"দেখা",bnR:"dekha"},"buy":{ja:"買う",jaR:"kau",bn:"কেনা",bnR:"kena"},
+      "please":{ja:"ください",jaR:"kudasai",bn:"দয়া করে",bnR:"doya kore"},"thank":{ja:"ありがとう",jaR:"arigatō",bn:"ধন্যবাদ",bnR:"dhonnobad"},
+      "where":{ja:"どこ",jaR:"doko",bn:"কোথায়",bnR:"kothay"},"is":{ja:"です",jaR:"desu",bn:"আছে",bnR:"ache"},
+      "this":{ja:"これ",jaR:"kore",bn:"এটা",bnR:"eta"},"want":{ja:"ほしい",jaR:"hoshii",bn:"চাই",bnR:"chai"},
+      "name":{ja:"名前",jaR:"namae",bn:"নাম",bnR:"nam"},"house":{ja:"家",jaR:"ie",bn:"বাড়ি",bnR:"bari"},
+      "school":{ja:"学校",jaR:"gakkō",bn:"স্কুল",bnR:"school"},"book":{ja:"本",jaR:"hon",bn:"বই",bnR:"boi"},
+      "main":"i","mujhe":"i","मैं":"i","मुझे":"i","पानी":"water","paani":"water","खाना":"food","khana":"food",
+      "चाय":"tea","स्टेशन":"station","होटल":"hotel","आज":"today","aaj":"today","कल":"tomorrow","kal":"tomorrow",
+      "दोस्त":"friend","dost":"friend","खुश":"happy","khush":"happy","अच्छा":"good","achha":"good",
+      "कहाँ":"where","kahan":"where","कहां":"where","नाम":"name","naam":"name","घर":"house","ghar":"house",
+      "किताब":"book","kitab":"book","चाहिए":"want","chahiye":"want","यह":"this","yeh":"this"
+    };
+
+    /* Speaking drills */
+    var DRILLS = {
+      ja:[
+        {t:"こんにちは", r:"Konnichiwa", m:"Hello"},
+        {t:"おはようございます", r:"Ohayō gozaimasu", m:"Good morning (polite)"},
+        {t:"ありがとうございます", r:"Arigatō gozaimasu", m:"Thank you very much"},
+        {t:"お元気ですか", r:"Ogenki desu ka", m:"How are you?"},
+        {t:"すみません", r:"Sumimasen", m:"Excuse me / sorry"},
+        {t:"おいしい", r:"Oishii", m:"Delicious!"},
+        {t:"駅はどこですか", r:"Eki wa doko desu ka", m:"Where is the station?"},
+        {t:"はじめまして", r:"Hajimemashite", m:"Nice to meet you"}
+      ],
+      bn:[
+        {t:"নমস্কার", r:"Nomoshkar", m:"Hello (respectful)"},
+        {t:"সুপ্রভাত", r:"Shuprobhat", m:"Good morning"},
+        {t:"ধন্যবাদ", r:"Dhonnobad", m:"Thank you"},
+        {t:"কেমন আছেন", r:"Kemon achen", m:"How are you?"},
+        {t:"মাফ করবেন", r:"Maf korben", m:"Excuse me"},
+        {t:"মজাদার", r:"Mojadar", m:"Delicious / fun!"},
+        {t:"স্টেশন কোথায়", r:"Station kothay", m:"Where is the station?"},
+        {t:"আবার দেখা হবে", r:"Abar dekha hobe", m:"See you again"}
+      ]
+    };
+
+    /* Chat scenes */
+    var SCENES = [
+      {id:"jp-meet", lang:"ja", label:"Japanese · First meeting in Tokyo", steps:[
+        {tutor:"こんにちは！はじめまして。", tutorR:"Konnichiwa! Hajimemashite.", tutorEn:"Hello! Nice to meet you.", prompt:"Reply to the greeting:", options:[
+          {t:"はじめまして", r:"Hajimemashite", en:"Nice to meet you too", ok:true},
+          {t:"さようなら", r:"Sayōnara", en:"Goodbye", ok:false},
+          {t:"お会計をお願いします", r:"Okaikei o onegai shimasu", en:"The bill, please", ok:false}],
+          why:"はじめまして (Hajimemashite) is the reply for a first meeting."},
+        {tutor:"お元気ですか？", tutorR:"Ogenki desu ka?", tutorEn:"How are you?", prompt:"Say you’re fine:", options:[
+          {t:"元気です", r:"Genki desu", en:"I’m fine", ok:true},
+          {t:"わかりません", r:"Wakarimasen", en:"I don’t understand", ok:false},
+          {t:"疲れました", r:"Tsukaremashita", en:"I’m tired", ok:false}],
+          why:"元気です (Genki desu) means “I’m fine / well.”"},
+        {tutor:"よろしくお願いします！", tutorR:"Yoroshiku onegai shimasu!", tutorEn:"Let’s get along well!", prompt:"Finish politely:", options:[
+          {t:"ありがとうございます", r:"Arigatō gozaimasu", en:"Thank you very much", ok:true},
+          {t:"助けて！", r:"Tasukete!", en:"Help!", ok:false},
+          {t:"またね", r:"Mata ne", en:"See you (casual)", ok:false}],
+          why:"A warm ありがとうございます (thank you) is the natural close here."}
+      ]},
+      {id:"jp-cafe", lang:"ja", label:"Japanese · At a café", steps:[
+        {tutor:"いらっしゃいませ！", tutorR:"Irasshaimase!", tutorEn:"Welcome in!", prompt:"Ask for the menu:", options:[
+          {t:"メニューをお願いします", r:"Menyū o onegai shimasu", en:"Menu, please", ok:true},
+          {t:"トイレはどこですか？", r:"Toire wa doko desu ka?", en:"Where is the toilet?", ok:false},
+          {t:"駅はどこですか？", r:"Eki wa doko desu ka?", en:"Where is the station?", ok:false}],
+          why:"メニューをお願いします is how you ask for a menu."},
+        {tutor:"コーヒーですね。", tutorR:"Kōhī desu ne.", tutorEn:"A coffee, right.", prompt:"Your coffee arrives — react:", options:[
+          {t:"おいしい！", r:"Oishii!", en:"Delicious!", ok:true},
+          {t:"辛くしないでください", r:"Karaku shinaide kudasai", en:"Not spicy, please", ok:false},
+          {t:"いいえ", r:"Iie", en:"No", ok:false}],
+          why:"おいしい！ (Oishii!) is the happy reaction to something tasty."},
+        {tutor:"ありがとうございました。", tutorR:"Arigatō gozaimashita.", tutorEn:"Thank you for coming.", prompt:"You’re leaving — ask to pay first:", options:[
+          {t:"お会計をお願いします", r:"Okaikei o onegai shimasu", en:"The bill, please", ok:true},
+          {t:"はじめまして", r:"Hajimemashite", en:"Nice to meet you", ok:false},
+          {t:"おやすみなさい", r:"Oyasuminasai", en:"Good night", ok:false}],
+          why:"お会計をお願いします asks for the bill."}
+      ]},
+      {id:"jp-directions", lang:"ja", label:"Japanese · Asking directions", steps:[
+        {tutor:"はい、どうしましたか？", tutorR:"Hai, dō shimashita ka?", tutorEn:"Yes, can I help?", prompt:"Ask where the station is:", options:[
+          {t:"駅はどこですか？", r:"Eki wa doko desu ka?", en:"Where is the station?", ok:true},
+          {t:"これはいくらですか？", r:"Kore wa ikura desu ka?", en:"How much is this?", ok:false},
+          {t:"お腹がすきました", r:"Onaka ga sukimashita", en:"I’m hungry", ok:false}],
+          why:"駅はどこですか？ is exactly “Where is the station?”"},
+        {tutor:"右です。", tutorR:"Migi desu.", tutorEn:"It’s on the right.", prompt:"Check you heard right — “right” is:", options:[
+          {t:"右", r:"Migi", en:"Right", ok:true},
+          {t:"左", r:"Hidari", en:"Left", ok:false},
+          {t:"ホテル", r:"Hoteru", en:"Hotel", ok:false}],
+          why:"右 = Migi = right. 左 = Hidari = left."},
+        {tutor:"気をつけて！", tutorR:"Ki o tsukete!", tutorEn:"Take care!", prompt:"Thank them warmly:", options:[
+          {t:"ありがとうございます", r:"Arigatō gozaimasu", en:"Thank you very much", ok:true},
+          {t:"すみません", r:"Sumimasen", en:"Sorry", ok:false},
+          {t:"はい", r:"Hai", en:"Yes", ok:false}],
+          why:"ありがとうございます is the full, polite thank-you."}
+      ]},
+      {id:"bn-meet", lang:"bn", label:"Bengali · First meeting in Kolkata", steps:[
+        {tutor:"নমস্কার! কেমন আছেন?", tutorR:"Nomoshkar! Kemon achen?", tutorEn:"Hello! How are you?", prompt:"Say you’re fine:", options:[
+          {t:"আমি ভালো আছি", r:"Ami bhalo achi", en:"I’m fine", ok:true},
+          {t:"বিদায়", r:"Bidai", en:"Goodbye", ok:false},
+          {t:"আমি ক্লান্ত", r:"Ami klanto", en:"I’m tired", ok:false}],
+          why:"আমি ভালো আছি (Ami bhalo achi) = “I’m fine.”"},
+        {tutor:"আপনার নাম কী?", tutorR:"Apnar nam ki?", tutorEn:"What is your name?", prompt:"Ask their name back:", options:[
+          {t:"আপনার নাম কী?", r:"Apnar nam ki?", en:"What is your name?", ok:true},
+          {t:"স্টেশন কোথায়?", r:"Station kothay?", en:"Where is the station?", ok:false},
+          {t:"এটার দাম কত?", r:"Etar dam koto?", en:"How much is this?", ok:false}],
+          why:"Asking আপনার নাম কী? back keeps the introductions going."},
+        {tutor:"আবার দেখা হবে!", tutorR:"Abar dekha hobe!", tutorEn:"See you again!", prompt:"Say goodbye warmly:", options:[
+          {t:"বিদায়, ধন্যবাদ", r:"Bidai, dhonnobad", en:"Goodbye, thank you", ok:true},
+          {t:"সাহায্য করুন!", r:"Shahajjo korun!", en:"Help!", ok:false},
+          {t:"না", r:"Na", en:"No", ok:false}],
+          why:"বিদায় (Bidai) is goodbye; adding ধন্যবাদ makes it warm."}
+      ]},
+      {id:"bn-tea", lang:"bn", label:"Bengali · At a tea stall", steps:[
+        {tutor:"কী দেব?", tutorR:"Ki debo?", tutorEn:"What shall I give you?", prompt:"Ask for the menu:", options:[
+          {t:"মেনুটা দিন, দয়া করে", r:"Menuta din, doya kore", en:"Menu, please", ok:true},
+          {t:"বিলটা দিন, দয়া করে", r:"Bilta din, doya kore", en:"The bill, please", ok:false},
+          {t:"বাথরুম কোথায়?", r:"Bathroom kothay?", en:"Where is the bathroom?", ok:false}],
+          why:"মেনুটা দিন, দয়া করে = “Menu, please.”"},
+        {tutor:"চা তৈরি।", tutorR:"Cha toiri.", tutorEn:"Your tea is ready.", prompt:"React to the first sip:", options:[
+          {t:"মজাদার!", r:"Mojadar!", en:"Delicious!", ok:true},
+          {t:"ঝাল দেবেন না", r:"Jhal deben na", en:"Don’t make it spicy", ok:false},
+          {t:"দুঃখিত", r:"Dukkhito", en:"Sorry", ok:false}],
+          why:"মজাদার! (Mojadar!) covers both “delicious” and “great fun.”"},
+        {tutor:"আর কিছু?", tutorR:"Ar kichhu?", tutorEn:"Anything else?", prompt:"You’re done — ask for the bill:", options:[
+          {t:"বিলটা দিন, দয়া করে", r:"Bilta din, doya kore", en:"The bill, please", ok:true},
+          {t:"চলুন যাই", r:"Cholun jai", en:"Let’s go", ok:false},
+          {t:"হ্যাঁ", r:"Hyan", en:"Yes", ok:false}],
+          why:"বিলটা দিন, দয়া করে politely asks for the bill."}
+      ]},
+      {id:"bn-market", lang:"bn", label:"Bengali · Shopping at the market", steps:[
+        {tutor:"আসুন, দেখুন!", tutorR:"Ashun, dekhun!", tutorEn:"Come, have a look!", prompt:"Ask the price:", options:[
+          {t:"এটার দাম কত?", r:"Etar dam koto?", en:"How much is this?", ok:true},
+          {t:"আমার খিদে পেয়েছে", r:"Amar khide peyeche", en:"I’m hungry", ok:false},
+          {t:"অভিনন্দন", r:"Obhinondon", en:"Congratulations", ok:false}],
+          why:"এটার দাম কত? = “How much is this?”"},
+        {tutor:"বাম দিকে আরও আছে।", tutorR:"Bam dike aro ache.", tutorEn:"There’s more on the left side.", prompt:"“Left” in Bengali is:", options:[
+          {t:"বাম", r:"Bam", en:"Left", ok:true},
+          {t:"ডান", r:"Dan", en:"Right", ok:false},
+          {t:"দশ", r:"Dosh", en:"Ten", ok:false}],
+          why:"বাম = Bam = left; ডান = Dan = right."},
+        {tutor:"ধন্যবাদ, আবার আসবেন!", tutorR:"Dhonnobad, abar ashben!", tutorEn:"Thanks, come again!", prompt:"Reply before you leave:", options:[
+          {t:"ধন্যবাদ", r:"Dhonnobad", en:"Thank you", ok:true},
+          {t:"আমি বুঝতে পারছি না", r:"Ami bujhte parchhi na", en:"I don’t understand", ok:false},
+          {t:"একটু অপেক্ষা করুন", r:"Ektu opekkha korun", en:"Wait a moment", ok:false}],
+          why:"A simple ধন্যবাদ is the friendly way to close."}
+      ]}
+    ];
+    </script>
+    <script>
+    /* ============================================================
+       HELPERS
+    ============================================================ */
+    function $(id){ return document.getElementById(id); }
+    function norm(s){ return (s||"").toLowerCase().replace(/[।.,!?;:'"“”‘’、。，？！·\-–—]/g,"").replace(/\s+/g," ").trim(); }
+    function levenshtein(a,b){
+      var m=a.length,n=b.length; if(!m) return n; if(!n) return m;
+      var prev=[],cur=[],i,j;
+      for(j=0;j<=n;j++) prev[j]=j;
+      for(i=1;i<=m;i++){ cur[0]=i;
+        for(j=1;j<=n;j++){ var c=a.charAt(i-1)===b.charAt(j-1)?0:1; cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+c); }
+        var t=prev; prev=cur; cur=t;
+      }
+      return prev[n];
+    }
+    function similarity(a,b){
+      a=norm(a).replace(/\s+/g,""); b=norm(b).replace(/\s+/g,"");
+      if(!a||!b) return 0;
+      if(a===b) return 100;
+      if(b.indexOf(a)>-1||a.indexOf(b)>-1) return 92;
+      var d=levenshtein(a,b), mx=Math.max(a.length,b.length);
+      return Math.round((1-d/mx)*100);
+    }
+    function shuffle(arr){ var a=arr.slice(); for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+
+    /* ---------- Speech out (device voices) ---------- */
+    function speak(text, lang, slow){
+      if(!("speechSynthesis" in window)){ showToast("This device has no speech voices available."); return; }
+      try{
+        window.speechSynthesis.cancel();
+        var u=new SpeechSynthesisUtterance(text);
+        u.lang = lang==="ja" ? "ja-JP" : (lang==="bn" ? "bn-IN" : (lang==="hi" ? "hi-IN" : "en-IN"));
+        var voices=window.speechSynthesis.getVoices()||[];
+        for(var i=0;i<voices.length;i++){ if(voices[i].lang && voices[i].lang.toLowerCase().indexOf(u.lang.slice(0,2))===0){ u.voice=voices[i]; break; } }
+        u.rate = slow?0.62:0.92;
+        window.speechSynthesis.speak(u);
+      }catch(e){ showToast("Couldn’t play speech on this device."); }
+    }
+    if("speechSynthesis" in window){ window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged=function(){ window.speechSynthesis.getVoices(); }; }
+    function showToast(msg){
+      var n=$("micNote"); if(n){ n.textContent=msg; }
+    }
+
+    /* ---------- Tabs ---------- */
+    var tabs=document.querySelectorAll(".tab");
+    tabs.forEach(function(t){
+      t.addEventListener("click",function(){ activateTab(t.getAttribute("data-tab")); });
+    });
+    function activateTab(name){
+      tabs.forEach(function(t){ t.setAttribute("aria-selected", t.getAttribute("data-tab")===name ? "true":"false"); });
+      document.querySelectorAll(".panel").forEach(function(p){ p.classList.toggle("active", p.id==="panel-"+name); });
+    }
+
+    /* ============================================================
+       TRANSLATOR
+    ============================================================ */
+    var lastResult=null; /* {target, romaji, lang, phrase} */
+    function targetOf(p, lang){ return lang==="ja" ? {t:p.ja, r:p.jaR} : {t:p.bn, r:p.bnR}; }
+
+    function findPhrase(input, from){
+      var q=norm(input);
+      q=q.replace(/^how to say /,"").replace(/^how do you say /,"").replace(/^translate /,"").replace(/^what is /,"").replace(/ in japanese$/,"").replace(/ in bengali$/,"");
+      var best=null,bestScore=0;
+      PHRASES.forEach(function(p){
+        var cands = from==="hi" ? [p.hi, p.hiR, p.en] : [p.en, p.hiR, p.hi];
+        cands.forEach(function(c){
+          var s=similarity(q,c);
+          if(s>bestScore){ bestScore=s; best=p; }
+        });
+      });
+      return bestScore>=70 ? best : null;
+    }
+    function wordByWord(input, from, to){
+      var raw=norm(input).split(" ");
+      var out=[], rom=[], unknown=[];
+      raw.forEach(function(w){
+        if(!w) return;
+        var entry=WORDS[w];
+        if(typeof entry==="string") entry=WORDS[entry];
+        if(entry){ out.push(to==="ja"?entry.ja:entry.bn); rom.push(to==="ja"?entry.jaR:entry.bnR); }
+        else { out.push(w); rom.push(w); unknown.push(w); }
+      });
+      return { text: out.join(to==="ja"?"":" "), romaji: rom.join(" "), unknown: unknown };
+    }
+    function doTranslate(){
+      var input=$("inputText").value.trim();
+      var from=$("fromLang").value, to=$("toLang").value;
+      var note=$("micNote"); note.className="mic-note";
+      if(!input){ note.textContent="Type or speak a sentence first — or tap one of the quick examples."; note.classList.add("err"); return; }
+      var p=findPhrase(input, from);
+      var res=$("result"); res.classList.add("show");
+      if(p){
+        var tg=targetOf(p,to);
+        lastResult={target:tg.t, romaji:tg.r, lang:to, phrase:p};
+        $("resultBadge").textContent="Phrasebook match"; $("resultBadge").className="badge match";
+        $("resultTarget").textContent=tg.t; $("resultTarget").className="target "+(to==="ja"?"ja":"bn");
+        $("resultRomaji").textContent=tg.r;
+        $("resultBack").textContent="Means: “"+p.en+"” · Hindi: "+p.hi+" ("+p.hiR+")";
+      } else {
+        var wb=wordByWord(input, from, to);
+        lastResult={target:wb.text, romaji:wb.romaji, lang:to, phrase:null};
+        $("resultBadge").textContent="Word-by-word beta"; $("resultBadge").className="badge word";
+        $("resultTarget").textContent=wb.text; $("resultTarget").className="target "+(to==="ja"?"ja":"bn");
+        $("resultRomaji").textContent=wb.romaji;
+        $("resultBack").textContent="Built word-by-word from the built-in dictionary"+(wb.unknown.length? " — these words aren’t in the beta dictionary yet, so they’re shown as typed: "+wb.unknown.join(", ")+"." : ".")+" Grammar order can differ from natural speech, so check full sentences in the Phrasebook.";
+      }
+      $("copyNote").textContent="";
+    }
+    $("translateBtn").addEventListener("click", doTranslate);
+    $("inputText").addEventListener("keydown", function(e){ if(e.key==="Enter" && (e.metaKey||e.ctrlKey)) doTranslate(); });
+    $("clearBtn").addEventListener("click", function(){ $("inputText").value=""; $("result").classList.remove("show"); $("micNote").textContent=""; });
+    $("swapBtn").addEventListener("click", function(){
+      var f=$("fromLang"), t=$("toLang");
+      /* Beta supports EN/HI -> JA/BN; swapping flips the target pair the other way via phrasebook study */
+      t.value = (t.value==="ja") ? "bn" : "ja";
+      $("micNote").textContent="Swapped the answer language to "+(t.value==="ja"?"Japanese":"Bengali")+". (This beta translates into Japanese and Bengali; to learn the English or Hindi for a phrase, use the Phrasebook.)";
+    });
+    document.querySelectorAll(".chip[data-q]").forEach(function(ch){
+      ch.addEventListener("click", function(){
+        if(ch.getAttribute("data-from")) $("fromLang").value=ch.getAttribute("data-from");
+        $("inputText").value=ch.getAttribute("data-q");
+        doTranslate();
+      });
+    });
+    $("listenBtn").addEventListener("click", function(){ if(lastResult) speak(lastResult.target, lastResult.lang, false); });
+    $("slowBtn").addEventListener("click", function(){ if(lastResult) speak(lastResult.target, lastResult.lang, true); });
+    $("copyBtn").addEventListener("click", function(){
+      if(!lastResult) return;
+      var txt=lastResult.target+" ("+lastResult.romaji+")";
+      function done(){ $("copyNote").textContent="Copied: "+txt; }
+      if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, function(){ $("copyNote").textContent=txt; }); }
+      else { $("copyNote").textContent=txt; }
+    });
+    $("scoreThisBtn").addEventListener("click", function(){
+      if(!lastResult) return;
+      setSpeakLang(lastResult.lang);
+      var idx=-1;
+      DRILLS[lastResult.lang].forEach(function(d,i){ if(norm(d.t)===norm(lastResult.target)) idx=i; });
+      if(idx===-1){
+        currentDrill={t:lastResult.target, r:lastResult.romaji, m:lastResult.phrase?lastResult.phrase.en:"Your translated phrase"};
+        renderDrill();
+      } else { selectDrill(idx); }
+      activateTab("speak");
+      window.scrollTo({top:0, behavior:"smooth"});
+    });
+
+    /* Speech in for the translator input */
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    function runRecognition(langCode, onResult, onError, onEnd){
+      if(!SR){ onError("nosupport"); return null; }
+      var rec=new SR();
+      rec.lang=langCode; rec.interimResults=false; rec.maxAlternatives=1;
+      rec.onresult=function(ev){ if(ev.results && ev.results[0] && ev.results[0][0]) onResult(ev.results[0][0].transcript); };
+      rec.onerror=function(ev){ onError(ev.error||"error"); };
+      if(onEnd) rec.onend=onEnd;
+      try{ rec.start(); }catch(e){ onError("error"); return null; }
+      return rec;
+    }
+    $("micBtn").addEventListener("click", function(){
+      var note=$("micNote"); note.className="mic-note";
+      if(!SR){ note.textContent="Speech input isn’t supported in this browser — typing works fully. Chrome, Edge and Android browsers support it best."; note.classList.add("err"); return; }
+      var from=$("fromLang").value;
+      var btn=$("micBtn"); btn.classList.add("recording"); btn.textContent="● Listening… tap again to stop";
+      note.textContent="Listening in "+(from==="hi"?"Hindi":"English")+"… speak now.";
+      var stopped=false;
+      var rec=runRecognition(from==="hi"?"hi-IN":"en-IN",
+        function(text){ $("inputText").value=text; doTranslate(); },
+        function(err){ note.textContent = err==="not-allowed" ? "Microphone permission was blocked — allow mic access, or just type instead." : "Didn’t catch that — try again, or type it."; note.classList.add("err"); },
+        function(){ btn.classList.remove("recording"); btn.textContent="🎙 Speak instead"; });
+      btn.onclick=function(){ if(rec && !stopped){ stopped=true; try{rec.stop();}catch(e){} } };
+    });
+
+    /* ============================================================
+       PHRASEBOOK
+    ============================================================ */
+    var pbLang="ja";
+    function renderPhrasebook(){
+      var q=norm($("pbSearch").value);
+      var host=$("phrasebook"); host.innerHTML=""; var any=false;
+      var cats=[];
+      PHRASES.forEach(function(p){ if(cats.indexOf(p.cat)===-1) cats.push(p.cat); });
+      cats.forEach(function(cat){
+        var items=PHRASES.filter(function(p){
+          if(p.cat!==cat) return false;
+          if(!q) return true;
+          return norm(p.en+" "+p.hi+" "+p.hiR+" "+p.ja+" "+p.jaR+" "+p.bn+" "+p.bnR+" "+p.cat).indexOf(q)>-1;
+        });
+        if(!items.length) return;
+        any=true;
+        var h=document.createElement("h3"); h.className="cat"; h.textContent=cat; host.appendChild(h);
+        var grid=document.createElement("div"); grid.className="phrase-grid";
+        items.forEach(function(p){
+          var tg=targetOf(p,pbLang);
+          var card=document.createElement("div"); card.className="phrase";
+          card.innerHTML='<span class="src"></span><span class="tgt"></span><span class="rom"></span>';
+          card.querySelector(".src").innerHTML="";
+          var en=document.createElement("span"); en.textContent=p.en;
+          var hi=document.createElement("small"); hi.className="hi"; hi.textContent=p.hi+" · "+p.hiR;
+          card.querySelector(".src").appendChild(en); card.querySelector(".src").appendChild(hi);
+          var tgtEl=card.querySelector(".tgt"); tgtEl.textContent=tg.t; tgtEl.classList.add(pbLang==="ja"?"ja":"bn");
+          card.querySelector(".rom").textContent=tg.r;
+          var foot=document.createElement("div"); foot.className="foot";
+          var listen=document.createElement("button"); listen.className="btn small teal"; listen.type="button"; listen.textContent="▶ Listen";
+          listen.addEventListener("click", function(){ speak(tg.t, pbLang, false); });
+          var tryBtn=document.createElement("button"); tryBtn.className="btn small"; tryBtn.type="button"; tryBtn.textContent="Score my try";
+          tryBtn.addEventListener("click", function(){
+            setSpeakLang(pbLang);
+            currentDrill={t:tg.t, r:tg.r, m:p.en};
+            renderDrill();
+            activateTab("speak"); window.scrollTo({top:0, behavior:"smooth"});
+          });
+          foot.appendChild(listen); foot.appendChild(tryBtn);
+          card.appendChild(foot);
+          grid.appendChild(card);
+        });
+        host.appendChild(grid);
+      });
+      $("pbEmpty").style.display=any?"none":"block";
+    }
+    function setPbLang(l){ pbLang=l; $("pbJa").setAttribute("aria-pressed", l==="ja"?"true":"false"); $("pbBn").setAttribute("aria-pressed", l==="bn"?"true":"false"); renderPhrasebook(); }
+    $("pbJa").addEventListener("click", function(){ setPbLang("ja"); });
+    $("pbBn").addEventListener("click", function(){ setPbLang("bn"); });
+    $("pbSearch").addEventListener("input", renderPhrasebook);
+    renderPhrasebook();
+
+    /* ============================================================
+       PHRASE OF THE DAY
+    ============================================================ */
+    (function(){
+      var now=new Date();
+      var dayNum=Math.floor(Date.UTC(now.getFullYear(),now.getMonth(),now.getDate())/86400000);
+      var lang=(dayNum%2===0)?"ja":"bn";
+      var p=PHRASES[dayNum%PHRASES.length];
+      var tg=targetOf(p,lang);
+      var el=$("dailyTarget"); el.textContent=tg.t; el.classList.add(lang==="ja"?"ja":"bn");
+      $("dailyRomaji").textContent=tg.r+" · "+(lang==="ja"?"Japanese":"Bengali");
+      $("dailyMeaning").textContent="“"+p.en+"” — in Hindi: "+p.hi;
+      $("dailyListen").addEventListener("click", function(){ speak(tg.t, lang, false); });
+      $("dailyTry").addEventListener("click", function(){
+        setSpeakLang(lang); currentDrill={t:tg.t, r:tg.r, m:p.en}; renderDrill();
+        activateTab("speak"); window.scrollTo({top:0, behavior:"smooth"});
+      });
+    })();
+
+    /* ============================================================
+       CHAT PRACTICE
+    ============================================================ */
+    var sceneSel=$("sceneSelect");
+    SCENES.forEach(function(s){ var o=document.createElement("option"); o.value=s.id; o.textContent=s.label; sceneSel.appendChild(o); });
+    var chat={scene:null, step:0, score:0, answered:false};
+    function addBubble(who, big, small, lang){
+      var log=$("chatlog");
+      var b=document.createElement("div"); b.className="bubble "+who;
+      var bigEl=document.createElement("span"); bigEl.className="big "+(lang==="ja"?"ja":lang==="bn"?"bn":""); bigEl.textContent=big;
+      b.appendChild(bigEl);
+      if(small){ var s=document.createElement("span"); s.className="small"; s.textContent=small; b.appendChild(s); }
+      if(who==="tutor"){
+        var hear=document.createElement("button"); hear.className="btn small hear"; hear.type="button"; hear.textContent="▶ Hear it";
+        hear.addEventListener("click", function(){ speak(big, lang, false); });
+        b.appendChild(hear);
+      }
+      log.appendChild(b);
+      log.scrollTop=log.scrollHeight;
+    }
+    function startScene(){
+      var id=sceneSel.value;
+      chat.scene=SCENES.filter(function(s){ return s.id===id; })[0];
+      chat.step=0; chat.score=0; chat.answered=false;
+      $("chatlog").innerHTML=""; $("sceneScore").style.display="none";
+      $("chatFeedback").className="feedback"; $("chatNextRow").style.display="none";
+      showStep();
+    }
+    function showStep(){
+      var st=chat.scene.steps[chat.step];
+      addBubble("tutor", st.tutor, st.tutorR+" — “"+st.tutorEn+"”", chat.scene.lang);
+      speak(st.tutor, chat.scene.lang, false);
+      var host=$("chatOptions"); host.innerHTML="";
+      var label=document.createElement("p"); label.style.margin="0 0 4px"; label.style.fontWeight="700"; label.textContent=st.prompt; host.appendChild(label);
+      shuffle(st.options).forEach(function(opt){
+        var btn=document.createElement("button"); btn.className="btn opt"; btn.type="button";
+        var big=document.createElement("span"); big.className="big "+(chat.scene.lang==="ja"?"ja":"bn"); big.textContent=opt.t;
+        var small=document.createElement("span"); small.className="small"; small.textContent=opt.r+" — "+opt.en;
+        btn.appendChild(big); btn.appendChild(small);
+        btn.addEventListener("click", function(){ answerOption(btn, opt, st); });
+        host.appendChild(btn);
+      });
+      chat.answered=false;
+    }
+    function answerOption(btn, opt, st){
+      if(chat.answered) return;
+      chat.answered=true;
+      addBubble("me", opt.t, opt.r, chat.scene.lang);
+      speak(opt.t, chat.scene.lang, false);
+      var fb=$("chatFeedback");
+      document.querySelectorAll("#chatOptions .opt").forEach(function(b){ b.disabled=true; });
+      if(opt.ok){
+        chat.score++; btn.classList.add("correct");
+        fb.className="feedback show good"; fb.textContent="✓ Right. "+st.why;
+      } else {
+        btn.classList.add("wrong");
+        fb.className="feedback show bad"; fb.textContent="Not quite. "+st.why+" Tap Continue to keep going — you’ll meet this phrase again in the Phrasebook.";
+      }
+      if(chat.step < chat.scene.steps.length-1){
+        $("chatNextRow").style.display="block";
+        $("chatNextBtn").textContent="Continue →";
+      } else {
+        $("chatNextRow").style.display="block";
+        $("chatNextBtn").textContent="See my scene score";
+      }
+    }
+    $("chatNextBtn").addEventListener("click", function(){
+      $("chatNextRow").style.display="none";
+      $("chatFeedback").className="feedback";
+      $("chatOptions").innerHTML="";
+      if(chat.step < chat.scene.steps.length-1){ chat.step++; showStep(); }
+      else {
+        var total=chat.scene.steps.length;
+        addBubble("tutor", chat.scene.lang==="ja"?"お疲れ様でした！":"খুব ভালো করেছেন!", (chat.scene.lang==="ja"?"Otsukaresama deshita!":"Khub bhalo korechen!")+" — Scene complete!", chat.scene.lang);
+        var sc=$("sceneScore"); sc.style.display="inline-block";
+        sc.innerHTML="Scene score: <b>"+chat.score+" / "+total+"</b>"+(chat.score===total?" — perfect run!":chat.score>=total-1?" — nearly perfect.":" — replay the scene to beat it.");
+        chat.scene=null;
+      }
+    });
+    $("startSceneBtn").addEventListener("click", startScene);
+
+    /* ============================================================
+       SPEAK & SCORE
+       Accuracy  = speech-recognition text match (or typed match)
+       Fluency   = speaking pace vs. a natural pace for the phrase
+       Tone      = mic volume + pitch movement (monotone scores low)
+    ============================================================ */
+    var spLang="ja", currentDrill=null;
+    function setSpeakLang(l){
+      spLang=l;
+      $("spJa").setAttribute("aria-pressed", l==="ja"?"true":"false");
+      $("spBn").setAttribute("aria-pressed", l==="bn"?"true":"false");
+      renderPracticeList();
+      selectDrill(0);
+    }
+    function renderPracticeList(){
+      var host=$("practiceList"); host.innerHTML="";
+      DRILLS[spLang].forEach(function(d,i){
+        var b=document.createElement("button"); b.className="practice-item"; b.type="button";
+        b.setAttribute("aria-pressed", currentDrill && norm(currentDrill.t)===norm(d.t) ? "true":"false");
+        var t=document.createElement("span"); t.className="t "+(spLang==="ja"?"ja":"bn"); t.textContent=d.t;
+        var m=document.createElement("span"); m.className="m"; m.textContent=d.r+" · "+d.m;
+        b.appendChild(t); b.appendChild(m);
+        b.addEventListener("click", function(){ selectDrill(i); });
+        host.appendChild(b);
+      });
+    }
+    function selectDrill(i){
+      currentDrill=DRILLS[spLang][i];
+      renderPracticeList(); renderDrill();
+    }
+    function renderDrill(){
+      if(!currentDrill) return;
+      var el=$("spTarget"); el.textContent=currentDrill.t; el.className="quiz-q "+(spLang==="ja"?"ja":"bn");
+      el.style.textAlign="left"; el.style.padding="8px 0 0";
+      $("spRomaji").textContent=currentDrill.r;
+      $("spMeaning").textContent="Means: “"+currentDrill.m+"” · Practising in "+(spLang==="ja"?"Japanese":"Bengali");
+      $("scoreArea").style.display="none"; $("spNote").textContent=""; $("spNote").className="mic-note";
+      renderPracticeList();
+    }
+    $("spJa").addEventListener("click", function(){ setSpeakLang("ja"); });
+    $("spBn").addEventListener("click", function(){ setSpeakLang("bn"); });
+    $("spListen").addEventListener("click", function(){ if(currentDrill) speak(currentDrill.t, spLang, false); });
+
+    /* --- live mic meter: volume + pitch tracking --- */
+    var meter={ctx:null, stream:null, raf:0, rms:[], pitches:[], start:0};
+    function autoPitch(buf, sampleRate){
+      var SIZE=buf.length, rms=0, i;
+      for(i=0;i<SIZE;i++) rms+=buf[i]*buf[i];
+      rms=Math.sqrt(rms/SIZE);
+      if(rms<0.01) return -1;
+      var r1=0, r2=SIZE-1, th=0.2;
+      for(i=0;i<SIZE/2;i++){ if(Math.abs(buf[i])<th){ r1=i; break; } }
+      for(i=1;i<SIZE/2;i++){ if(Math.abs(buf[SIZE-i])<th){ r2=SIZE-i; break; } }
+      var b=buf.slice(r1,r2); SIZE=b.length; if(SIZE<32) return -1;
+      var corr=[], best=-1, bestCorr=0, lastCorr=1, found=false;
+      for(var lag=0;lag<SIZE;lag++){
+        var c=0; for(i=0;i<SIZE-lag;i++) c+=b[i]*b[i+lag];
+        corr[lag]=c;
+        if(c>0.9*lastCorr && c>lastCorr){ /* rising */ }
+        if(found && c<bestCorr) break;
+        if(c>bestCorr){ bestCorr=c; best=lag; found=true; }
+        lastCorr=c;
+      }
+      if(best===-1) return -1;
+      return sampleRate/best;
+    }
+    function startMeter(){
+      meter.rms=[]; meter.pitches=[]; meter.start=Date.now();
+      if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return;
+      navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+        meter.stream=stream;
+        var AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+        meter.ctx=new AC();
+        var src=meter.ctx.createMediaStreamSource(stream);
+        var an=meter.ctx.createAnalyser(); an.fftSize=2048;
+        src.connect(an);
+        var buf=new Float32Array(an.fftSize);
+        $("liveMeter").classList.add("on");
+        (function loop(){
+          an.getFloatTimeDomainData(buf);
+          var sum=0; for(var i=0;i<buf.length;i++) sum+=buf[i]*buf[i];
+          var rms=Math.sqrt(sum/buf.length);
+          meter.rms.push(rms);
+          $("meterFill").style.width=Math.min(100, Math.round(rms*380))+"%";
+          var p=autoPitch(buf, meter.ctx.sampleRate);
+          if(p>60 && p<450) meter.pitches.push(p);
+          meter.raf=requestAnimationFrame(loop);
+        })();
+      }).catch(function(){ /* meter is optional; recognition can still run */ });
+    }
+    function stopMeter(){
+      cancelAnimationFrame(meter.raf);
+      $("liveMeter").classList.remove("on");
+      if(meter.stream){ meter.stream.getTracks().forEach(function(t){ t.stop(); }); meter.stream=null; }
+      if(meter.ctx){ try{ meter.ctx.close(); }catch(e){} meter.ctx=null; }
+      var dur=(Date.now()-meter.start)/1000;
+      var avg=0; meter.rms.forEach(function(v){ avg+=v; }); avg=meter.rms.length?avg/meter.rms.length:0;
+      var range=0;
+      if(meter.pitches.length>6){
+        var mn=Math.min.apply(null,meter.pitches), mx=Math.max.apply(null,meter.pitches);
+        if(mn>0) range=12*Math.log(mx/mn)/Math.log(2); /* semitones */
+      }
+      return {duration:dur, avgRms:avg, pitchRange:range, voiced:meter.pitches.length};
+    }
+    function toneScore(m){
+      if(!m || m.voiced<3) return null;
+      var energy;
+      if(m.avgRms<0.008) energy=25; else if(m.avgRms<0.02) energy=55;
+      else if(m.avgRms<=0.22) energy=95; else energy=65;
+      var expr;
+      if(m.pitchRange<1) expr=40; else if(m.pitchRange<2) expr=62;
+      else if(m.pitchRange<=7) expr=95; else if(m.pitchRange<=11) expr=78; else expr=60;
+      return Math.round(energy*0.5+expr*0.5);
+    }
+    function fluencyScore(targetText, durationSec){
+      if(!durationSec || durationSec<0.3) return null;
+      var chars=norm(targetText).replace(/\s+/g,"").length || 1;
+      var natural = spLang==="ja" ? chars*0.22 : chars*0.20; /* seconds at a natural pace */
+      var ratio=durationSec/natural;
+      if(ratio<0.45) return 45;            /* rushed / cut short */
+      if(ratio<0.7) return 72;
+      if(ratio<=1.6) return 96;            /* natural band */
+      if(ratio<=2.4) return 74;
+      if(ratio<=3.6) return 55;
+      return 38;                            /* long pauses */
+    }
+    function setBar(el, numEl, val){
+      if(val===null || typeof val==="undefined"){ numEl.textContent="—"; el.style.width="0%"; return; }
+      numEl.textContent=val;
+      el.style.width=val+"%";
+      el.className = val>=75 ? "" : (val>=50 ? "mid" : "low");
+    }
+    function showScore(heard, acc, flu, tone, typedOnly){
+      $("scoreArea").style.display="block";
+      $("heardLine").innerHTML="";
+      var lab=document.createElement("span"); lab.textContent="We heard: ";
+      var b=document.createElement("b"); b.textContent="“"+heard+"”";
+      $("heardLine").appendChild(lab); $("heardLine").appendChild(b);
+      setBar($("barAcc"), $("scAcc"), acc);
+      setBar($("barFlu"), $("scFlu"), flu);
+      setBar($("barTone"), $("scTone"), tone);
+      var parts=[], weights=0, sum=0;
+      if(acc!==null){ sum+=acc*0.55; weights+=0.55; }
+      if(flu!==null){ sum+=flu*0.25; weights+=0.25; }
+      if(tone!==null){ sum+=tone*0.20; weights+=0.20; }
+      var overall=weights?Math.round(sum/weights):acc;
+      $("scOverall").textContent=overall;
+      var verdict, sub;
+      if(overall>=90){ verdict="Excellent — that sounded natural."; sub="Keep this phrase in your daily rotation."; }
+      else if(overall>=75){ verdict="Great try — very understandable."; sub="One more slow listen, then say it again at the same pace."; }
+      else if(overall>=55){ verdict="Good start — it’s getting there."; sub="Shadow the recording: play it, pause, and copy the rhythm exactly."; }
+      else if(overall>=35){ verdict="Keep going — break it into pieces."; sub="Practise the phrase in two halves, then join them together."; }
+      else { verdict="Let’s rebuild it slowly."; sub="Listen at slow speed (🐢 in the translator), repeat word by word, then try the full phrase."; }
+      $("scVerdict").textContent=verdict; $("scVerdictSub").textContent=sub;
+      var tips=[];
+      if(acc!==null && acc<70) tips.push("Accuracy: the words didn’t fully land. Compare what we heard with the target above, and stress each syllable evenly"+(spLang==="ja"?" — Japanese syllables (mora) are even beats.":" — Bengali stress usually falls near the start of a word."));
+      if(acc!==null && acc>=90) tips.push("Accuracy: spot on — the recogniser heard exactly the target phrase.");
+      if(!typedOnly && flu!==null && flu<70) tips.push("Fluency: your pace was off the natural band — either rushed or with long gaps. Aim for one smooth run, like the recording.");
+      if(!typedOnly && tone!==null && tone<60) tips.push("Tone & energy: that came out quiet or flat. Project a little more and let your voice rise and fall with the meaning"+(spLang==="ja"?" — gently; Japanese uses pitch steps rather than big swings.":"."));
+      if(!typedOnly && tone!==null && tone>=85) tips.push("Tone & energy: lively, well-projected delivery — that’s what makes it sound natural.");
+      if(typedOnly) tips.push("Typed check: only accuracy can be scored from typing. Use the mic to also score your fluency and tone.");
+      if(!tips.length) tips.push("Solid all round. Try the next phrase in the list, or take this one into a Chat Practice scene.");
+      var ul=$("scTips"); ul.innerHTML="";
+      tips.forEach(function(t){ var li=document.createElement("li"); li.textContent=t; ul.appendChild(li); });
+      $("scoreArea").scrollIntoView({behavior:"smooth", block:"nearest"});
+    }
+
+    $("spMic").addEventListener("click", function(){
+      var note=$("spNote"); note.className="mic-note";
+      if(!currentDrill){ note.textContent="Pick a phrase first."; return; }
+      if(!SR){ note.textContent="Speech recognition isn’t supported in this browser, so tone and fluency can’t be measured here — the typed check below still scores your accuracy. Chrome / Edge / Android work best."; note.classList.add("err"); return; }
+      var btn=$("spMic"); btn.classList.add("recording"); btn.textContent="● Listening… say it now";
+      note.textContent="Listening in "+(spLang==="ja"?"Japanese":"Bengali")+"… say: "+currentDrill.t;
+      var metrics=null, finished=false;
+      startMeter();
+      var rec=runRecognition(spLang==="ja"?"ja-JP":"bn-IN",
+        function(text){
+          finished=true;
+          metrics=stopMeter();
+          var acc=similarity(text, currentDrill.t);
+          var flu=fluencyScore(currentDrill.t, metrics?metrics.duration:0);
+          var tone=toneScore(metrics);
+          showScore(text, acc, flu, tone, false);
+        },
+        function(err){
+          if(finished) return;
+          stopMeter();
+          note.textContent = err==="not-allowed" ? "Microphone permission was blocked — allow mic access, or use the typed check below."
+            : err==="no-speech" ? "No speech was picked up — move a little closer and try again."
+            : "Didn’t catch that — try again, speaking clearly at a normal pace.";
+          note.classList.add("err");
+        },
+        function(){ btn.classList.remove("recording"); btn.textContent="🎙 Tap & say it"; if(!finished) stopMeter(); });
+      if(!rec){ stopMeter(); btn.classList.remove("recording"); btn.textContent="🎙 Tap & say it"; }
+    });
+    $("spTypeScore").addEventListener("click", function(){
+      var v=$("spTyped").value.trim();
+      var note=$("spNote"); note.className="mic-note";
+      if(!v){ note.textContent="Type what you said first — exactly as you said it."; note.classList.add("err"); return; }
+      var acc=similarity(v, currentDrill.t);
+      if(acc<40 && similarity(v, currentDrill.r)>acc){ acc=similarity(v, currentDrill.r); }
+      showScore(v, acc, null, null, true);
+    });
+    setSpeakLang("ja");
+
+    /* ============================================================
+       QUIZ
+    ============================================================ */
+    var qzLang="ja", quiz={list:[], idx:0, score:0, locked:false};
+    function setQzLang(l){ qzLang=l; $("qzJa").setAttribute("aria-pressed", l==="ja"?"true":"false"); $("qzBn").setAttribute("aria-pressed", l==="bn"?"true":"false"); }
+    $("qzJa").addEventListener("click", function(){ setQzLang("ja"); });
+    $("qzBn").addEventListener("click", function(){ setQzLang("bn"); });
+    function quizStart(){
+      quiz.list=shuffle(PHRASES).slice(0,10); quiz.idx=0; quiz.score=0;
+      $("quizStart").textContent="Restart quiz";
+      quizNextQ();
+    }
+    function quizNextQ(){
+      quiz.locked=false;
+      var p=quiz.list[quiz.idx];
+      var tg=targetOf(p,qzLang);
+      $("quizStatus").textContent="Round "+(quiz.idx+1)+" of "+quiz.list.length+" · Score so far: "+quiz.score;
+      $("quizProg").style.width=Math.round(quiz.idx/quiz.list.length*100)+"%";
+      var q=$("quizQ"); q.textContent=tg.t; q.className="quiz-q "+(qzLang==="ja"?"ja":"bn");
+      $("quizRom").textContent=tg.r;
+      $("quizFeedback").className="feedback";
+      $("quizNext").style.display="none";
+      $("quizListen").style.display="inline-flex";
+      $("quizListen").onclick=function(){ speak(tg.t, qzLang, false); };
+      var wrongs=shuffle(PHRASES.filter(function(x){ return x!==p; })).slice(0,3);
+      var opts=shuffle([p].concat(wrongs));
+      var host=$("quizOpts"); host.innerHTML="";
+      opts.forEach(function(o){
+        var b=document.createElement("button"); b.className="btn opt"; b.type="button"; b.textContent=o.en;
+        b.addEventListener("click", function(){
+          if(quiz.locked) return; quiz.locked=true;
+          var fb=$("quizFeedback");
+          if(o===p){ quiz.score++; b.classList.add("correct"); fb.className="feedback show good"; fb.textContent="✓ Correct — “"+p.en+"”. "+(qzLang==="ja"?p.ja:p.bn)+" · "+tg.r; speak(tg.t, qzLang, false); }
+          else { b.classList.add("wrong"); fb.className="feedback show bad"; fb.textContent="That was “"+o.en+"”. The right answer is “"+p.en+"”. "; }
+          host.querySelectorAll("button").forEach(function(x){ x.disabled=true; });
+          $("quizStatus").textContent="Round "+(quiz.idx+1)+" of "+quiz.list.length+" · Score so far: "+quiz.score;
+          var nx=$("quizNext"); nx.style.display="inline-flex";
+          nx.textContent = quiz.idx<quiz.list.length-1 ? "Next →" : "See result";
+        });
+        host.appendChild(b);
+      });
+    }
+    $("quizStart").addEventListener("click", quizStart);
+    $("quizNext").addEventListener("click", function(){
+      if(quiz.idx<quiz.list.length-1){ quiz.idx++; quizNextQ(); }
+      else {
+        $("quizProg").style.width="100%";
+        $("quizQ").textContent=""; $("quizRom").textContent=""; $("quizOpts").innerHTML="";
+        $("quizListen").style.display="none"; $("quizNext").style.display="none";
+        $("quizStatus").textContent="Quiz complete.";
+        var fb=$("quizFeedback"); fb.className="feedback show "+(quiz.score>=7?"good":"bad");
+        fb.textContent="You scored "+quiz.score+" / "+quiz.list.length+(quiz.score===10?". Perfect — try the other language next!":quiz.score>=7?". Strong. A Phrasebook pass will polish the misses.":". Good effort — run the Phrasebook, then retake the quiz.");
+      }
+    });
+    </script>
+  </body>
+</html>
