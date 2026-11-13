@@ -94,6 +94,10 @@
       .result.show{display:block}
       .result .target{font-size:clamp(1.7rem,5vw,2.4rem);font-weight:700;line-height:1.3;margin:2px 0 4px}
       .result .romaji{font-size:1.05rem;color:var(--teal);font-weight:700}
+      .result .romaji:empty{display:none}
+      .result .you-said{margin:10px 0 0;padding:9px 12px;background:var(--surface2);border-radius:8px;font-size:.96rem;color:var(--ink)}
+      .result .you-said .ys-label{font-weight:800;color:var(--muted)}
+      .result .reading-note{font-size:.85rem;color:var(--muted);margin:5px 0 0}
       .result .back{color:var(--muted);margin-top:6px}
       .badge{display:inline-block;border-radius:999px;padding:3px 10px;font-size:.76rem;font-weight:800;letter-spacing:.03em}
       .badge.match{background:var(--teal-soft);color:var(--teal)}
@@ -275,6 +279,8 @@
             <span class="badge match" id="resultBadge">Phrasebook match</span>
             <div class="target" id="resultTarget">—</div>
             <div class="romaji" id="resultRomaji">—</div>
+            <p class="you-said" id="resultYouSaid" hidden></p>
+            <p class="reading-note" id="resultReadingNote" hidden></p>
             <p class="back" id="resultBack">—</p>
             <div class="actions">
               <button class="btn teal" id="listenBtn" type="button">▶ Listen</button>
@@ -405,7 +411,7 @@
       </section>
 
       <footer>
-        <p><strong>How translation works now:</strong> everyday phrases match the hand-checked Phrasebook first (instant, offline, with pronunciation). Any other word or sentence is translated live — on-device in Chrome where available, otherwise via the free MyMemory online service. If the online daily limit is reached or you’re offline, the app falls back to its built-in word-by-word helper and labels it clearly, so you always get something. Live translations don’t include a hand-written pronunciation guide — use ▶ Listen to hear them. Speaking scores use your device’s microphone and speech recognition; tone is estimated from volume and pitch movement, a guide, not a native speaker’s ear.</p>
+        <p><strong>How translation works now:</strong> everyday phrases match the hand-checked Phrasebook first (instant, offline, with pronunciation). Any other word or sentence is translated live — on-device in Chrome where available, otherwise via the free MyMemory online service. If the online daily limit is reached or you’re offline, the app falls back to its built-in word-by-word helper and labels it clearly, so you always get something. Live translations show a Reading line in English letters underneath — automatic romaji for Japanese, an approximate transliteration for Bengali — and your original sentence stays visible as a “You said” caption, like before. That reading is machine-made, not hand-checked like the Phrasebook, so ▶ Listen is still the best guide to the true sound. Speaking scores use your device’s microphone and speech recognition; tone is estimated from volume and pitch movement, a guide, not a native speaker’s ear.</p>
       </footer>
     </div>
 
@@ -815,23 +821,196 @@
       var btn=$("translateBtn");
       if(btn){ btn.disabled=!!on; btn.textContent = on ? "Translating…" : "Translate anything"; }
     }
+    /* ---------- Reading captions for live results ----------
+       Japanese: automatic romaji via Kuroshiro + Kuromoji, loaded lazily.
+       Bengali: built-in script-to-Roman transliteration below. */
+    function hideLiveCaptions(){
+      var y=$("resultYouSaid"); if(y){ y.hidden=true; y.textContent=""; }
+      var n=$("resultReadingNote"); if(n){ n.hidden=true; n.textContent=""; }
+    }
+    function showYouSaid(input){
+      var y=$("resultYouSaid"); if(!y) return;
+      y.innerHTML="";
+      var lab=document.createElement("span"); lab.className="ys-label"; lab.textContent="You said: ";
+      y.appendChild(lab);
+      y.appendChild(document.createTextNode("“"+input+"”"));
+      y.hidden=false;
+    }
+    function showReadingNote(msg){
+      var n=$("resultReadingNote"); if(!n) return;
+      if(msg){ n.textContent=msg; n.hidden=false; } else { n.hidden=true; n.textContent=""; }
+    }
+
+    /* ----- Bengali → Roman transliteration (deterministic, approximate) ----- */
+    var BN_INDEP={"অ":"o","আ":"a","ই":"i","ঈ":"i","উ":"u","ঊ":"u","ঋ":"ri","এ":"e","ঐ":"oi","ও":"o","ঔ":"ou"};
+    var BN_CONS={"ক":"k","খ":"kh","গ":"g","ঘ":"gh","ঙ":"ng","চ":"ch","ছ":"chh","জ":"j","ঝ":"jh","ঞ":"n","ট":"t","ঠ":"th","ড":"d","ঢ":"dh","ণ":"n","ত":"t","থ":"th","দ":"d","ধ":"dh","ন":"n","প":"p","ফ":"ph","ব":"b","ভ":"bh","ম":"m","য":"j","র":"r","ল":"l","শ":"sh","ষ":"sh","স":"s","হ":"h","য়":"y","ৎ":"t"};
+    var BN_MATRA={"া":"a","ি":"i","ী":"i","ু":"u","ূ":"u","ৃ":"ri","ে":"e","ৈ":"oi","ো":"o","ৌ":"ou"};
+    var BN_DIGITS={"০":"0","১":"1","২":"2","৩":"3","৪":"4","৫":"5","৬":"6","৭":"7","৮":"8","৯":"9"};
+    var BN_VIRAMA="্", BN_NUKTA="়";
+    function bnIsBoundary(c){
+      return c==null || /[\s\.,!\?;:'"\(\)\[\]\{\}।॥\-–—\/]/.test(c);
+    }
+    function bengaliToRoman(text){
+      if(!text) return "";
+      var chars=String(text).split("");
+      var out="", i=0;
+      while(i<chars.length){
+        var ch=chars[i];
+        if(Object.prototype.hasOwnProperty.call(BN_DIGITS,ch)){ out+=BN_DIGITS[ch]; i++; continue; }
+        if(Object.prototype.hasOwnProperty.call(BN_INDEP,ch)){ out+=BN_INDEP[ch]; i++; continue; }
+        if(Object.prototype.hasOwnProperty.call(BN_MATRA,ch)){ out+=BN_MATRA[ch]; i++; continue; }
+        if(ch==="ং"){ out+="ng"; i++; continue; }
+        if(ch==="ঃ"){ out+="h"; i++; continue; }
+        if(ch==="ঁ"){ out+="n"; i++; continue; }
+        if(ch===BN_VIRAMA || ch===BN_NUKTA){ i++; continue; }
+        if(Object.prototype.hasOwnProperty.call(BN_CONS,ch)){
+          var base=BN_CONS[ch];
+          /* য right after a virama is the ya-phala — read it as “y”, not “j” */
+          if(ch==="য" && i>0 && chars[i-1]===BN_VIRAMA) base="y";
+          var j=i+1;
+          /* Nukta changes ড→r and ঢ→rh (ড় / ঢ়), and য→y (য়) */
+          if(j<chars.length && chars[j]===BN_NUKTA){
+            if(ch==="ড") base="r"; else if(ch==="ঢ") base="rh"; else if(ch==="য") base="y";
+            j++;
+          }
+          /* Followed by a vowel sign (matra): consonant + that vowel */
+          if(j<chars.length && Object.prototype.hasOwnProperty.call(BN_MATRA,chars[j])){
+            out+=base+BN_MATRA[chars[j]]; i=j+1; continue;
+          }
+          /* Followed by virama (hasanta): bare consonant, part of a conjunct or a final stop */
+          if(j<chars.length && chars[j]===BN_VIRAMA){
+            out+=base; i=j+1; continue;
+          }
+          /* Followed by anusvara / visarga / chandrabindu: keep the inherent vowel, sign is read next */
+          if(j<chars.length && (chars[j]==="ং" || chars[j]==="ঃ" || chars[j]==="ঁ")){
+            out+=base+"o"; i=j; continue;
+          }
+          /* Word-final consonants drop the inherent vowel; others keep it as “o” */
+          if(j>=chars.length || bnIsBoundary(chars[j])){ out+=base; i=j; continue; }
+          out+=base+"o"; i=j; continue;
+        }
+        out+=ch; i++;
+      }
+      return out.replace(/\s+/g," ").trim();
+    }
+
+    /* ----- Japanese → romaji via Kuroshiro + Kuromoji (lazy, failure-safe) ----- */
+    var KURO_DICT_PATH="https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/dict/";
+    var kuroshiroReady=null;
+    function loadScriptOnce(src){
+      return new Promise(function(resolve, reject){
+        var existing=document.querySelector('script[data-kuro-src="'+src+'"]');
+        if(existing){
+          if(existing.getAttribute("data-loaded")==="1"){ resolve(); return; }
+          existing.addEventListener("load", function(){ resolve(); });
+          existing.addEventListener("error", function(){ reject(new Error("load-failed")); });
+          return;
+        }
+        var s=document.createElement("script");
+        s.src=src; s.async=true; s.setAttribute("data-kuro-src", src);
+        s.onload=function(){ s.setAttribute("data-loaded","1"); resolve(); };
+        s.onerror=function(){ reject(new Error("load-failed: "+src)); };
+        document.head.appendChild(s);
+      });
+    }
+    function getKuroshiro(){
+      if(kuroshiroReady) return kuroshiroReady;
+      kuroshiroReady=(async function(){
+        if(!window.Kuroshiro) await loadScriptOnce("https://cdn.jsdelivr.net/npm/kuroshiro@1.2.0/dist/kuroshiro.min.js");
+        if(!window.kuromoji) await loadScriptOnce("https://cdn.jsdelivr.net/npm/kuromoji@0.1.2/build/kuromoji.js");
+        if(!window.KuromojiAnalyzer){
+          try{ await loadScriptOnce("https://cdn.jsdelivr.net/npm/kuroshiro-analyzer-kuromoji@1.1.0/dist/kuroshiro-analyzer-kuromoji.min.js"); }catch(e){ /* adapter below may still work */ }
+        }
+        var KuroCtor=window.Kuroshiro && (window.Kuroshiro.default || window.Kuroshiro);
+        if(!KuroCtor) throw new Error("kuroshiro-missing");
+        var analyzer=null;
+        var AnaCtor=window.KuromojiAnalyzer && (window.KuromojiAnalyzer.default || window.KuromojiAnalyzer);
+        if(AnaCtor){
+          analyzer=new AnaCtor({dictPath: KURO_DICT_PATH});
+        } else if(window.kuromoji && window.kuromoji.builder){
+          /* Minimal adapter with the init/parse shape Kuroshiro expects, on top of kuromoji itself */
+          analyzer={
+            _tokenizer:null,
+            init:function(){
+              var self=this;
+              return new Promise(function(resolve, reject){
+                try{
+                  window.kuromoji.builder({dicPath: KURO_DICT_PATH}).build(function(err, tk){
+                    if(err) reject(err); else { self._tokenizer=tk; resolve(); }
+                  });
+                }catch(e){ reject(e); }
+              });
+            },
+            parse:function(str){
+              return Promise.resolve(this._tokenizer ? this._tokenizer.tokenize(str) : []);
+            }
+          };
+        } else {
+          throw new Error("kuromoji-analyzer-missing");
+        }
+        var ks=new KuroCtor();
+        await ks.init(analyzer);
+        return ks;
+      })();
+      /* If loading fails, forget the promise so the next translation can retry */
+      kuroshiroReady.catch(function(){ kuroshiroReady=null; });
+      return kuroshiroReady;
+    }
+    async function japaneseRomaji(text){
+      var ks=await getKuroshiro();
+      var out=await ks.convert(text, {mode:"spaced", to:"romaji", romajiSystem:"hepburn"});
+      return String(out||"").replace(/\s+/g," ").trim();
+    }
+    function fillJapaneseReading(input, translated){
+      japaneseRomaji(translated).then(function(reading){
+        /* Ignore the result if the user has already moved on to another translation */
+        if(!lastResult || lastResult.target!==translated || lastResult.input!==input) return;
+        if(!reading) throw new Error("empty-reading");
+        lastResult.romaji=reading;
+        $("resultRomaji").textContent="Reading: "+reading;
+        showReadingNote("");
+      }).catch(function(){
+        if(!lastResult || lastResult.target!==translated || lastResult.input!==input) return;
+        lastResult.romaji="";
+        $("resultRomaji").textContent="";
+        showReadingNote("Reading couldn’t be loaded this time — tap Listen below to hear it instead.");
+      });
+    }
+
     function showLiveResult(input, from, to, translated, source){
       var res=$("result"); res.classList.add("show");
       lastResult={target:translated, romaji:"", lang:to, phrase:null, source:source, input:input};
       if(source==="device"){
         $("resultBadge").textContent="On-device translation"; $("resultBadge").className="badge device";
-        $("resultBack").textContent="Translated on your device (Chrome) from “"+input+"”. No pronunciation guide for live translations — tap Listen to hear it.";
+        $("resultBack").textContent="Translated on your device (Chrome) · "+(from==="hi"?"Hindi":"English")+" → "+(to==="ja"?"Japanese":"Bengali")+". The Reading line is generated automatically — tap Listen to hear it too.";
       } else {
         $("resultBadge").textContent="Live translation — online"; $("resultBadge").className="badge live";
-        $("resultBack").textContent="Translated online from “"+input+"” · "+(from==="hi"?"Hindi":"English")+" → "+(to==="ja"?"Japanese":"Bengali")+". Tap Listen to hear it — live translations don’t include a hand-written pronunciation guide.";
+        $("resultBack").textContent="Translated online · "+(from==="hi"?"Hindi":"English")+" → "+(to==="ja"?"Japanese":"Bengali")+". The Reading line is generated automatically — tap Listen to hear it too.";
       }
       $("resultTarget").textContent=translated; $("resultTarget").className="target "+(to==="ja"?"ja":"bn");
-      $("resultRomaji").textContent="▶ Use Listen / Slow listen below to hear the pronunciation";
+      showYouSaid(input);
+      if(to==="bn"){
+        var readingBn=bengaliToRoman(translated);
+        if(readingBn && readingBn!==translated){
+          lastResult.romaji=readingBn;
+          $("resultRomaji").textContent="Reading: "+readingBn;
+          showReadingNote("Approximate reading guide — Bengali sounds don’t map exactly onto English letters, so use Listen for the true sound.");
+        } else {
+          $("resultRomaji").textContent="";
+          showReadingNote("No reading guide for this result — tap Listen below to hear it.");
+        }
+      } else {
+        /* Show the translation straight away; the romaji reading fills in when ready */
+        $("resultRomaji").textContent="Reading: …";
+        showReadingNote("");
+        fillJapaneseReading(input, translated);
+      }
       $("copyNote").textContent="";
     }
     function showFallbackResult(input, from, to, reason){
       var wb=wordByWord(input, from, to);
       var res=$("result"); res.classList.add("show");
+      hideLiveCaptions();
       lastResult={target:wb.text, romaji:wb.romaji, lang:to, phrase:null, source:"fallback"};
       $("resultBadge").textContent="Offline helper — word-by-word"; $("resultBadge").className="badge word";
       $("resultTarget").textContent=wb.text; $("resultTarget").className="target "+(to==="ja"?"ja":"bn");
@@ -854,6 +1033,7 @@
       if(p){
         var tg=targetOf(p,to);
         var res=$("result"); res.classList.add("show");
+        hideLiveCaptions();
         lastResult={target:tg.t, romaji:tg.r, lang:to, phrase:p, source:"phrasebook"};
         $("resultBadge").textContent="Phrasebook match — hand-checked"; $("resultBadge").className="badge match";
         $("resultTarget").textContent=tg.t; $("resultTarget").className="target "+(to==="ja"?"ja":"bn");
@@ -909,7 +1089,13 @@
     $("slowBtn").addEventListener("click", function(){ if(lastResult) speak(lastResult.target, lastResult.lang, true); });
     $("copyBtn").addEventListener("click", function(){
       if(!lastResult) return;
-      var txt=lastResult.romaji ? lastResult.target+" ("+lastResult.romaji+")" : lastResult.target;
+      var txt;
+      if(lastResult.romaji && (lastResult.source==="device" || lastResult.source==="online")){
+        txt=lastResult.target+"\nReading: "+lastResult.romaji;
+        if(lastResult.input) txt+="\nYou said: "+lastResult.input;
+      } else {
+        txt=lastResult.romaji ? lastResult.target+" ("+lastResult.romaji+")" : lastResult.target;
+      }
       function done(){ $("copyNote").textContent="Copied: "+txt; }
       if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, function(){ $("copyNote").textContent=txt; }); }
       else { $("copyNote").textContent=txt; }
