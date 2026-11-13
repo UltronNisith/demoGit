@@ -98,6 +98,11 @@
       .badge{display:inline-block;border-radius:999px;padding:3px 10px;font-size:.76rem;font-weight:800;letter-spacing:.03em}
       .badge.match{background:var(--teal-soft);color:var(--teal)}
       .badge.word{background:var(--gold-soft);color:var(--gold)}
+      .badge.live{background:var(--accent);color:var(--accent-ink)}
+      .badge.device{background:var(--ink);color:var(--bg)}
+      .translating{display:none;align-items:center;gap:10px;margin-top:14px;color:var(--muted);font-weight:700;font-size:.92rem}
+      .translating.on{display:flex}
+      .translating .dot{width:9px;height:9px;border-radius:50%;background:var(--accent);animation:pulse 0.9s ease-in-out infinite;flex:none}
       .result .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
       .mic-note{font-size:.88rem;color:var(--muted);margin-top:8px;min-height:1.3em}
       .mic-note.err{color:var(--warn)}
@@ -188,8 +193,9 @@
               <span class="h-ja ja">こんにちは。</span>
               <span class="h-bn bn">নমস্কার।</span>
             </h1>
-            <p class="lede">Ask in <strong>English or Hindi</strong> — answer, learn and practise out loud in <strong>Japanese or Bengali</strong>. Translate phrases, chat through real-life scenes, and get a score for how your speaking sounds.</p>
+            <p class="lede">Ask in <strong>English or Hindi</strong> — answer, learn and practise out loud in <strong>Japanese or Bengali</strong>. Translate <strong>any word or sentence</strong>, chat through real-life scenes, and get a score for how your speaking sounds.</p>
             <div class="stat-row">
+              <span class="stat"><b>Any</b> sentence — live translation</span>
               <span class="stat"><b>45</b> everyday phrases</span>
               <span class="stat"><b>6</b> conversation scenes</span>
               <span class="stat"><b>16</b> speaking drills</span>
@@ -223,8 +229,8 @@
       <!-- ================= TRANSLATE ================= -->
       <section class="panel active" id="panel-translate" role="tabpanel" aria-labelledby="tab-translate">
         <div class="card">
-          <h2>Translate &amp; talk</h2>
-          <p class="sub">Type or speak in English or Hindi, and hear it back in Japanese or Bengali — script, pronunciation and all.</p>
+          <h2>Translate &amp; talk — anything you type</h2>
+          <p class="sub">Type or speak <strong>any word or sentence</strong> in English or Hindi, and get it in Japanese or Bengali. Everyday phrases use the hand-checked Phrasebook first for the best pronunciation guide; anything else is translated live — on-device when your browser supports it, otherwise online.</p>
           <div class="lang-row">
             <div>
               <label class="flabel" for="fromLang">You ask in</label>
@@ -244,22 +250,24 @@
           </div>
 
           <div style="margin-top:14px">
-            <label class="flabel" for="inputText">Your sentence</label>
-            <textarea id="inputText" placeholder="Try: How to say hello · Where is the station? · Thank you"></textarea>
+            <label class="flabel" for="inputText">Your word or sentence — anything</label>
+            <textarea id="inputText" placeholder="Try anything: I have an exam tomorrow · My train is late · Can we meet at the library at five?"></textarea>
           </div>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
-            <button class="btn primary" id="translateBtn" type="button">Translate</button>
+            <button class="btn primary" id="translateBtn" type="button">Translate anything</button>
             <button class="btn" id="micBtn" type="button">🎙 Speak instead</button>
             <button class="btn ghost" id="clearBtn" type="button">Clear</button>
           </div>
+          <div class="translating" id="translatingRow" aria-live="polite"><span class="dot"></span><span id="translatingTxt">Translating…</span></div>
           <p class="mic-note" id="micNote" aria-live="polite"></p>
 
           <div class="chips" aria-label="Quick examples">
             <button class="chip" type="button" data-q="Hello">How to say hello</button>
-            <button class="chip" type="button" data-q="How are you?">How are you?</button>
             <button class="chip" type="button" data-q="Where is the station?">Where is the station?</button>
+            <button class="chip" type="button" data-q="I have an exam tomorrow, please wish me luck">I have an exam tomorrow…</button>
+            <button class="chip" type="button" data-q="My train is late, I will reach home at night">My train is late…</button>
             <button class="chip" type="button" data-q="धन्यवाद" data-from="hi">धन्यवाद (thank you)</button>
-            <button class="chip" type="button" data-q="मुझे भूख लगी है" data-from="hi">मुझे भूख लगी है (I’m hungry)</button>
+            <button class="chip" type="button" data-q="मुझे कल डॉक्टर के पास जाना है" data-from="hi">मुझे कल डॉक्टर के पास जाना है</button>
             <button class="chip" type="button" data-q="How much is this?">How much is this?</button>
           </div>
 
@@ -397,7 +405,7 @@
       </section>
 
       <footer>
-        <p><strong>Beta notes:</strong> translations come from a built-in, hand-checked phrasebook of everyday sentences, plus a word-by-word helper for simple new sentences — natural, native phrasing can differ, so treat word-by-word results as a starting point. Speaking scores use your device’s microphone and speech recognition on this device; tone is estimated from your volume and pitch movement, which is a guide, not a native speaker’s ear. Japanese recognition works best in Chrome / Edge / Android; Bengali recognition support varies by device.</p>
+        <p><strong>How translation works now:</strong> everyday phrases match the hand-checked Phrasebook first (instant, offline, with pronunciation). Any other word or sentence is translated live — on-device in Chrome where available, otherwise via the free MyMemory online service. If the online daily limit is reached or you’re offline, the app falls back to its built-in word-by-word helper and labels it clearly, so you always get something. Live translations don’t include a hand-written pronunciation guide — use ▶ Listen to hear them. Speaking scores use your device’s microphone and speech recognition; tone is estimated from volume and pitch movement, a guide, not a native speaker’s ear.</p>
       </footer>
     </div>
 
@@ -700,38 +708,195 @@
       });
       return { text: out.join(to==="ja"?"":" "), romaji: rom.join(" "), unknown: unknown };
     }
-    function doTranslate(){
+    function splitChunks(text, maxLen){
+      maxLen = maxLen || 450;
+      if(text.length <= maxLen) return [text];
+      var parts = text.match(/[^.!?।\n]+[.!?।\n]*/g) || [text];
+      var chunks=[], cur="";
+      function pushLong(s){
+        while(s.length > maxLen){
+          var cut = s.lastIndexOf(" ", maxLen);
+          if(cut < 120) cut = maxLen;
+          chunks.push(s.slice(0,cut).trim());
+          s = s.slice(cut).trim();
+        }
+        if(s) chunks.push(s);
+      }
+      parts.forEach(function(part){
+        var p = part;
+        if(p.length > maxLen){
+          if(cur){ chunks.push(cur); cur=""; }
+          pushLong(p.trim());
+          return;
+        }
+        if((cur + p).length > maxLen){
+          if(cur) chunks.push(cur);
+          cur = p;
+        } else { cur += p; }
+      });
+      if(cur && cur.trim()) chunks.push(cur);
+      return chunks.filter(function(c){ return c && c.trim(); });
+    }
+    function fetchWithTimeout(url, ms){
+      if(window.AbortController){
+        var ctrl = new AbortController();
+        var t = setTimeout(function(){ try{ ctrl.abort(); }catch(e){} }, ms || 14000);
+        return fetch(url, {signal: ctrl.signal}).then(function(r){ clearTimeout(t); return r; }, function(e){ clearTimeout(t); throw e; });
+      }
+      return fetch(url);
+    }
+    function translateWithChrome(text, from, to){
+      return new Promise(function(resolve, reject){
+        if(!("Translator" in window) || !window.Translator){ reject(new Error("no-chrome-translator")); return; }
+        var timedOut=false;
+        var timer=setTimeout(function(){ timedOut=true; reject(new Error("chrome-timeout")); }, 20000);
+        function done(v){ if(!timedOut){ clearTimeout(timer); resolve(v); } }
+        function fail(e){ if(!timedOut){ clearTimeout(timer); reject(e); } }
+        (async function(){
+          try{
+            var avail = "unavailable";
+            if(window.Translator.availability){
+              avail = await window.Translator.availability({sourceLanguage: from, targetLanguage: to});
+            } else if(window.Translator.canTranslate){
+              var ct = await window.Translator.canTranslate({sourceLanguage: from, targetLanguage: to});
+              avail = ct === "readily" ? "available" : (ct === "after-download" ? "downloadable" : "unavailable");
+            }
+            if(avail === "unavailable" || avail === "no"){ fail(new Error("chrome-unavailable")); return; }
+            var translator = await window.Translator.create({sourceLanguage: from, targetLanguage: to});
+            var chunks = splitChunks(text, 800);
+            var out=[];
+            for(var i=0;i<chunks.length;i++){ out.push(await translator.translate(chunks[i])); }
+            try{ if(translator.destroy) translator.destroy(); }catch(e){}
+            var joined = out.join(" ").trim();
+            if(!joined) fail(new Error("chrome-empty")); else done(joined);
+          }catch(e){ fail(e); }
+        })();
+      });
+    }
+    function decodeEntities(s){
+      if(!s || s.indexOf("&")===-1) return s;
+      try{ var ta=document.createElement("textarea"); ta.innerHTML=s; return ta.value; }catch(e){ return s; }
+    }
+    function isQuotaText(t){
+      if(!t) return false;
+      var u = String(t).toUpperCase();
+      return u.indexOf("MYMEMORY WARNING")>-1 || u.indexOf("YOU USED ALL AVAILABLE FREE TRANSLATIONS")>-1 || u.indexOf("QUOTA")>-1 && u.indexOf("MYMEMORY")>-1;
+    }
+    function translateWithMyMemory(text, from, to){
+      var chunks = splitChunks(text, 450);
+      var results = [];
+      var chain = Promise.resolve();
+      chunks.forEach(function(chunk){
+        chain = chain.then(function(){
+          var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(chunk) + "&langpair=" + encodeURIComponent(from) + "|" + encodeURIComponent(to);
+          return fetchWithTimeout(url, 14000).then(function(resp){
+            return resp.json().then(function(data){
+              var status = data && data.responseStatus != null ? String(data.responseStatus) : (resp.ok ? "200" : String(resp.status));
+              var translated = data && data.responseData && data.responseData.translatedText ? String(data.responseData.translatedText).trim() : "";
+              if(status === "429" || status === "403" || isQuotaText(translated)){
+                var err = new Error("quota"); err.code="quota"; throw err;
+              }
+              if(status !== "200" && status !== "200 OK"){
+                /* MyMemory sometimes returns 404 for no match */
+                if(!translated){ var e2=new Error("mymemory-"+status); e2.code="error"; throw e2; }
+              }
+              if(!translated || isQuotaText(translated)){ var e3=new Error("quota"); e3.code="quota"; throw e3; }
+              /* If service echoes source unchanged for a chunk, keep it but continue */
+              results.push(decodeEntities(translated));
+            });
+          });
+        });
+      });
+      return chain.then(function(){ return results.join(" ").trim(); });
+    }
+    function setTranslating(on, msg){
+      var row=$("translatingRow");
+      if(row){ row.classList.toggle("on", !!on); if(msg) $("translatingTxt").textContent=msg; }
+      var btn=$("translateBtn");
+      if(btn){ btn.disabled=!!on; btn.textContent = on ? "Translating…" : "Translate anything"; }
+    }
+    function showLiveResult(input, from, to, translated, source){
+      var res=$("result"); res.classList.add("show");
+      lastResult={target:translated, romaji:"", lang:to, phrase:null, source:source, input:input};
+      if(source==="device"){
+        $("resultBadge").textContent="On-device translation"; $("resultBadge").className="badge device";
+        $("resultBack").textContent="Translated on your device (Chrome) from “"+input+"”. No pronunciation guide for live translations — tap Listen to hear it.";
+      } else {
+        $("resultBadge").textContent="Live translation — online"; $("resultBadge").className="badge live";
+        $("resultBack").textContent="Translated online from “"+input+"” · "+(from==="hi"?"Hindi":"English")+" → "+(to==="ja"?"Japanese":"Bengali")+". Tap Listen to hear it — live translations don’t include a hand-written pronunciation guide.";
+      }
+      $("resultTarget").textContent=translated; $("resultTarget").className="target "+(to==="ja"?"ja":"bn");
+      $("resultRomaji").textContent="▶ Use Listen / Slow listen below to hear the pronunciation";
+      $("copyNote").textContent="";
+    }
+    function showFallbackResult(input, from, to, reason){
+      var wb=wordByWord(input, from, to);
+      var res=$("result"); res.classList.add("show");
+      lastResult={target:wb.text, romaji:wb.romaji, lang:to, phrase:null, source:"fallback"};
+      $("resultBadge").textContent="Offline helper — word-by-word"; $("resultBadge").className="badge word";
+      $("resultTarget").textContent=wb.text; $("resultTarget").className="target "+(to==="ja"?"ja":"bn");
+      $("resultRomaji").textContent=wb.romaji;
+      var why = reason==="quota" ? "The free online translation limit for today has been reached, so this uses the offline helper for now. Try again tomorrow for full live translation."
+        : reason==="offline" ? "You appear to be offline (or the translation service didn’t respond), so this uses the offline helper. Reconnect and tap Translate again for a full live translation."
+        : "Live translation didn’t work just now, so this uses the offline helper. Tap Translate again to retry live translation.";
+      $("resultBack").textContent=why+" Built word-by-word"+(wb.unknown.length? " — these words aren’t in the built-in dictionary, so they’re shown as typed: "+wb.unknown.join(", ")+"." : ".")+" Word order can differ from natural speech.";
+      $("copyNote").textContent="";
+    }
+    var translateSeq=0;
+    async function doTranslate(){
       var input=$("inputText").value.trim();
       var from=$("fromLang").value, to=$("toLang").value;
-      var note=$("micNote"); note.className="mic-note";
+      var note=$("micNote"); note.className="mic-note"; note.textContent="";
       if(!input){ note.textContent="Type or speak a sentence first — or tap one of the quick examples."; note.classList.add("err"); return; }
+      var mySeq=++translateSeq;
+      /* 1) Phrasebook first — instant, offline, with pronunciation */
       var p=findPhrase(input, from);
-      var res=$("result"); res.classList.add("show");
       if(p){
         var tg=targetOf(p,to);
-        lastResult={target:tg.t, romaji:tg.r, lang:to, phrase:p};
-        $("resultBadge").textContent="Phrasebook match"; $("resultBadge").className="badge match";
+        var res=$("result"); res.classList.add("show");
+        lastResult={target:tg.t, romaji:tg.r, lang:to, phrase:p, source:"phrasebook"};
+        $("resultBadge").textContent="Phrasebook match — hand-checked"; $("resultBadge").className="badge match";
         $("resultTarget").textContent=tg.t; $("resultTarget").className="target "+(to==="ja"?"ja":"bn");
         $("resultRomaji").textContent=tg.r;
         $("resultBack").textContent="Means: “"+p.en+"” · Hindi: "+p.hi+" ("+p.hiR+")";
-      } else {
-        var wb=wordByWord(input, from, to);
-        lastResult={target:wb.text, romaji:wb.romaji, lang:to, phrase:null};
-        $("resultBadge").textContent="Word-by-word beta"; $("resultBadge").className="badge word";
-        $("resultTarget").textContent=wb.text; $("resultTarget").className="target "+(to==="ja"?"ja":"bn");
-        $("resultRomaji").textContent=wb.romaji;
-        $("resultBack").textContent="Built word-by-word from the built-in dictionary"+(wb.unknown.length? " — these words aren’t in the beta dictionary yet, so they’re shown as typed: "+wb.unknown.join(", ")+"." : ".")+" Grammar order can differ from natural speech, so check full sentences in the Phrasebook.";
+        $("copyNote").textContent="";
+        return;
       }
-      $("copyNote").textContent="";
+      /* 2 + 3) Live translation: on-device Chrome first, then MyMemory online */
+      setTranslating(true, "Translating your sentence…");
+      var liveText=null, liveSource=null, failReason=null;
+      try{
+        liveText = await translateWithChrome(input, from, to);
+        if(liveText) liveSource="device";
+      }catch(eChrome){ liveText=null; }
+      if(mySeq!==translateSeq){ setTranslating(false); return; }
+      if(!liveText){
+        try{
+          liveText = await translateWithMyMemory(input, from, to);
+          if(liveText) liveSource="online";
+        }catch(eMM){
+          failReason = (eMM && eMM.code==="quota") ? "quota" : (!navigator.onLine ? "offline" : "error");
+          if(eMM && (eMM.name==="TypeError" || eMM.name==="AbortError")) failReason = !navigator.onLine ? "offline" : "offline";
+          liveText=null;
+        }
+      }
+      if(mySeq!==translateSeq){ setTranslating(false); return; }
+      setTranslating(false);
+      if(liveText){
+        /* Safety: never show a quota warning as if it were a translation */
+        if(isQuotaText(liveText)){ showFallbackResult(input, from, to, "quota"); return; }
+        showLiveResult(input, from, to, liveText, liveSource);
+      } else {
+        showFallbackResult(input, from, to, failReason || "error");
+      }
     }
     $("translateBtn").addEventListener("click", doTranslate);
     $("inputText").addEventListener("keydown", function(e){ if(e.key==="Enter" && (e.metaKey||e.ctrlKey)) doTranslate(); });
-    $("clearBtn").addEventListener("click", function(){ $("inputText").value=""; $("result").classList.remove("show"); $("micNote").textContent=""; });
+    $("clearBtn").addEventListener("click", function(){ translateSeq++; setTranslating(false); $("inputText").value=""; $("result").classList.remove("show"); $("micNote").textContent=""; lastResult=null; });
     $("swapBtn").addEventListener("click", function(){
       var f=$("fromLang"), t=$("toLang");
-      /* Beta supports EN/HI -> JA/BN; swapping flips the target pair the other way via phrasebook study */
       t.value = (t.value==="ja") ? "bn" : "ja";
-      $("micNote").textContent="Swapped the answer language to "+(t.value==="ja"?"Japanese":"Bengali")+". (This beta translates into Japanese and Bengali; to learn the English or Hindi for a phrase, use the Phrasebook.)";
+      $("micNote").textContent="Swapped the answer language to "+(t.value==="ja"?"Japanese":"Bengali")+". (The app translates into Japanese and Bengali; to learn the English or Hindi for a phrase, use the Phrasebook.)";
     });
     document.querySelectorAll(".chip[data-q]").forEach(function(ch){
       ch.addEventListener("click", function(){
@@ -744,7 +909,7 @@
     $("slowBtn").addEventListener("click", function(){ if(lastResult) speak(lastResult.target, lastResult.lang, true); });
     $("copyBtn").addEventListener("click", function(){
       if(!lastResult) return;
-      var txt=lastResult.target+" ("+lastResult.romaji+")";
+      var txt=lastResult.romaji ? lastResult.target+" ("+lastResult.romaji+")" : lastResult.target;
       function done(){ $("copyNote").textContent="Copied: "+txt; }
       if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(txt).then(done, function(){ $("copyNote").textContent=txt; }); }
       else { $("copyNote").textContent=txt; }
@@ -755,7 +920,7 @@
       var idx=-1;
       DRILLS[lastResult.lang].forEach(function(d,i){ if(norm(d.t)===norm(lastResult.target)) idx=i; });
       if(idx===-1){
-        currentDrill={t:lastResult.target, r:lastResult.romaji, m:lastResult.phrase?lastResult.phrase.en:"Your translated phrase"};
+        currentDrill={t:lastResult.target, r:lastResult.romaji||"Listen first to hear the pronunciation", m:lastResult.phrase?lastResult.phrase.en:(lastResult.input?("“"+lastResult.input+"”"):"Your translated phrase")};
         renderDrill();
       } else { selectDrill(idx); }
       activateTab("speak");
