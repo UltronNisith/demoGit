@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
-    <link rel="icon" href="data:," />
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20108%20108%22%3E%3Cdefs%3E%3ClinearGradient%20id%3D%22g%22%20x1%3D%220%22%20y1%3D%220%22%20x2%3D%221%22%20y2%3D%221%22%3E%3Cstop%20offset%3D%220%22%20stop-color%3D%22%230f766e%22%2F%3E%3Cstop%20offset%3D%221%22%20stop-color%3D%22%23312e81%22%2F%3E%3C%2FlinearGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%22108%22%20height%3D%22108%22%20fill%3D%22url%28%23g%29%22%2F%3E%3Crect%20x%3D%2215%22%20y%3D%2223%22%20width%3D%2278%22%20height%3D%2251%22%20rx%3D%2210%22%20fill%3D%22%23ffffff%22%2F%3E%3Cpath%20d%3D%22M32%2073%20L48%2073%20L35%2091%20Z%22%20fill%3D%22%23ffffff%22%2F%3E%3Ccircle%20cx%3D%2291%22%20cy%3D%2221%22%20r%3D%226%22%20fill%3D%22%23f59e0b%22%20stroke%3D%22%23ffffff%22%20stroke-width%3D%221.5%22%2F%3E%3Ctext%20x%3D%2240%22%20y%3D%2260%22%20font-size%3D%2230%22%20font-weight%3D%22bold%22%20fill%3D%22%230d5f58%22%20text-anchor%3D%22middle%22%20font-family%3D%22sans-serif%22%3E%E3%81%82%3C%2Ftext%3E%3Ctext%20x%3D%2268%22%20y%3D%2261%22%20font-size%3D%2230%22%20font-weight%3D%22bold%22%20fill%3D%22%23262260%22%20text-anchor%3D%22middle%22%20font-family%3D%22sans-serif%22%3E%E0%A6%85%3C%2Ftext%3E%3C%2Fsvg%3E" />
     <title>Language App Beta</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -181,6 +181,19 @@
       .progress-line{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin:12px 0}
       .progress-line i{display:block;height:100%;background:var(--accent);width:0;transition:width .4s ease}
 
+
+      .brand{display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+      .brand-icon{width:46px;height:46px;border-radius:12px;box-shadow:0 4px 14px rgba(15,60,70,.28)}
+      .brand-name{font-weight:800;font-size:1.12rem;letter-spacing:.2px}
+      .ver-pill{background:linear-gradient(120deg,#0f766e,#312e81);color:#fff;border-radius:999px;padding:4px 11px;font-size:.78rem;font-weight:700}
+      .how-btn{margin-left:auto}
+      .how-panel{border:1.5px dashed var(--teal);background:var(--teal-soft);border-radius:14px;padding:16px 18px;margin:14px 0 4px}
+      .how-panel h2{margin:0 0 8px;font-size:1.05rem}
+      .how-panel ol{margin:6px 0 10px;padding-left:20px}
+      .how-panel li{margin:4px 0}
+      .how-panel p{margin:6px 0;color:inherit}
+      footer .credit{font-size:1rem;color:inherit}
+      footer .credit strong{color:var(--teal)}
       footer{margin-top:34px;color:var(--muted);font-size:.88rem;border-top:1px solid var(--line);padding-top:16px}
       .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
     </style>
@@ -190,6 +203,12 @@
 
       <!-- ================= HERO ================= -->
       <header class="hero">
+        <div class="brand">
+          <svg class="brand-icon" aria-label="Language App Beta icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#0f766e"/><stop offset="1" stop-color="#312e81"/></linearGradient></defs><rect width="108" height="108" fill="url(#g)"/><rect x="15" y="23" width="78" height="51" rx="10" fill="#ffffff"/><path d="M32 73 L48 73 L35 91 Z" fill="#ffffff"/><circle cx="91" cy="21" r="6" fill="#f59e0b" stroke="#ffffff" stroke-width="1.5"/><text x="40" y="60" font-size="30" font-weight="bold" fill="#0d5f58" text-anchor="middle" font-family="sans-serif">あ</text><text x="68" y="61" font-size="30" font-weight="bold" fill="#262260" text-anchor="middle" font-family="sans-serif">অ</text></svg>
+          <span class="brand-name">Language App Beta</span>
+          <span class="ver-pill">v0.5-beta</span>
+          <button class="btn small how-btn" id="howBtn" type="button" aria-expanded="false" aria-controls="howPanel">How to use</button>
+        </div>
         <div class="hero-grid">
           <div>
             <h1 class="hello-stack">
@@ -203,7 +222,7 @@
               <span class="stat"><b>45</b> everyday phrases</span>
               <span class="stat"><b>6</b> conversation scenes</span>
               <span class="stat"><b>16</b> speaking drills</span>
-              <span class="stat">Beta</span>
+              <span class="stat"><b>v0.5</b> beta</span>
             </div>
           </div>
           <aside class="daily" aria-label="Phrase of the day">
@@ -218,6 +237,18 @@
           </aside>
         </div>
       </header>
+
+      <div class="how-panel" id="howPanel" hidden>
+        <h2>How to use</h2>
+        <ol>
+          <li><strong>Translate &amp; Talk:</strong> type or speak in English or Hindi, pick Japanese or Bengali, and press Translate — then ▶ Listen to hear it.</li>
+          <li><strong>Phrasebook:</strong> everyday phrases with pronunciation guides. Press Listen, then Score my try.</li>
+          <li><strong>Chat Practice:</strong> pick a scene, listen to your partner, choose the reply that fits.</li>
+          <li><strong>Speak &amp; Score:</strong> say the phrase and get scores for accuracy, fluency and tone.</li>
+          <li><strong>Quiz:</strong> 10 quick rounds to test what you have learned.</li>
+        </ol>
+        <p><strong>How translation works:</strong> everyday phrases match the hand-checked Phrasebook first (instant, offline, with pronunciation). Any other word or sentence is translated live — on-device in Chrome where available, otherwise via the free MyMemory online service. If the online daily limit is reached or you are offline, the app falls back to its built-in word-by-word helper and labels it clearly. Live translations show a Reading line in English letters underneath, and your original sentence stays visible as a “You said” caption. Speaking scores use your device’s microphone and speech recognition; tone is estimated from volume and pitch movement — a guide, not a native speaker’s ear.</p>
+      </div>
 
       <!-- ================= TABS ================= -->
       <div class="tabbar">
@@ -411,7 +442,8 @@
       </section>
 
       <footer>
-        <p><strong>How translation works now:</strong> everyday phrases match the hand-checked Phrasebook first (instant, offline, with pronunciation). Any other word or sentence is translated live — on-device in Chrome where available, otherwise via the free MyMemory online service. If the online daily limit is reached or you’re offline, the app falls back to its built-in word-by-word helper and labels it clearly, so you always get something. Live translations show a Reading line in English letters underneath — automatic romaji for Japanese, an approximate transliteration for Bengali — and your original sentence stays visible as a “You said” caption, like before. That reading is machine-made, not hand-checked like the Phrasebook, so ▶ Listen is still the best guide to the true sound. Speaking scores use your device’s microphone and speech recognition; tone is estimated from volume and pitch movement, a guide, not a native speaker’s ear.</p>
+        <p class="credit">Made by Nisith&rsquo;s personal agent — <strong>Teddy</strong> 🤗</p>
+        <p>Language App Beta &bull; Version 0.5-beta &bull; Tap &ldquo;How to use&rdquo; at the top for how translation and scoring work.</p>
       </footer>
     </div>
 
@@ -657,21 +689,45 @@
 
     /* ---------- Speech out (device voices) ---------- */
     function speak(text, lang, slow){
+      var tag = lang==="ja" ? "ja-JP" : (lang==="bn" ? "bn-IN" : (lang==="hi" ? "hi-IN" : "en-IN"));
+      var rate = slow?0.62:0.92;
+      /* Android app shell: WebView has no working speech voices, so use the
+         phone's own Text-to-Speech through the native bridge when present. */
+      try{
+        if(window.TeddyTTS && typeof TeddyTTS.speak==="function"){
+          if(TeddyTTS.speak(text, tag, rate)) return;
+        }
+      }catch(e){}
       if(!("speechSynthesis" in window)){ showToast("This device has no speech voices available."); return; }
       try{
-        window.speechSynthesis.cancel();
+        var ss=window.speechSynthesis;
+        ss.cancel();
         var u=new SpeechSynthesisUtterance(text);
-        u.lang = lang==="ja" ? "ja-JP" : (lang==="bn" ? "bn-IN" : (lang==="hi" ? "hi-IN" : "en-IN"));
-        var voices=window.speechSynthesis.getVoices()||[];
-        for(var i=0;i<voices.length;i++){ if(voices[i].lang && voices[i].lang.toLowerCase().indexOf(u.lang.slice(0,2))===0){ u.voice=voices[i]; break; } }
-        u.rate = slow?0.62:0.92;
-        window.speechSynthesis.speak(u);
+        u.lang=tag;
+        var voices=ss.getVoices()||[];
+        for(var i=0;i<voices.length;i++){ if(voices[i].lang && voices[i].lang.toLowerCase().indexOf(tag.slice(0,2))===0){ u.voice=voices[i]; break; } }
+        u.rate=rate;
+        ss.speak(u);
+        /* Android Chrome quirk: speech can start paused — nudge it. */
+        setTimeout(function(){ try{ if(ss.paused) ss.resume(); }catch(e){} }, 120);
+        setTimeout(function(){ try{ if(ss.speaking===false && ss.pending===false){ /* nothing played */ } }catch(e){} }, 600);
       }catch(e){ showToast("Couldn’t play speech on this device."); }
     }
-    if("speechSynthesis" in window){ window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged=function(){ window.speechSynthesis.getVoices(); }; }
+    if("speechSynthesis" in window){ try{ window.speechSynthesis.getVoices(); window.speechSynthesis.onvoiceschanged=function(){ window.speechSynthesis.getVoices(); }; }catch(e){} }
     function showToast(msg){
       var n=$("micNote"); if(n){ n.textContent=msg; }
     }
+
+    /* ---------- How to use (hidden until clicked) ---------- */
+    (function(){
+      var btn=$("howBtn"), panel=$("howPanel");
+      if(!btn||!panel) return;
+      btn.addEventListener("click", function(){
+        var open = panel.hasAttribute("hidden");
+        if(open){ panel.removeAttribute("hidden"); btn.textContent="Hide \u201cHow to use\u201d"; btn.setAttribute("aria-expanded","true"); }
+        else { panel.setAttribute("hidden",""); btn.textContent="How to use"; btn.setAttribute("aria-expanded","false"); }
+      });
+    })();
 
     /* ---------- Tabs ---------- */
     var tabs=document.querySelectorAll(".tab");
